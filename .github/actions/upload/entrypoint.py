@@ -27,7 +27,7 @@ def run_command(command, verbose=True):
     return p.returncode
 
 
-def create_kernel_meta(id, title, code_file, competition_source):
+def create_kernel_meta(id, title, code_file, competition_sources):
     return {
         "id": id,
         "title": title,
@@ -38,25 +38,34 @@ def create_kernel_meta(id, title, code_file, competition_source):
         "enable_gpu": "false",
         "enable_internet": "false",
         "dataset_sources": [],
-        "competition_sources": [competition_source],
+        "competition_sources": competition_sources,
         "kernel_sources": [],
     }
 
 
-def get_action_input(name):
-    return os.getenv(f"INPUT_{name.upper()}")
+def get_action_input(name, as_list=False):
+    action_input = os.getenv(f"INPUT_{name.upper()}")
+    if as_list:
+        # Ignore empty and comment lines.
+        return [
+            x
+            for x in action_input.split("\n")
+            if x.strip() != "" and not x.startswith("#")
+        ]
+
+    return action_input
 
 
 def main():
     id = get_action_input("id")
     title = get_action_input("title")
     code_file = get_action_input("code_file")
-    competition_source = get_action_input("competition_source")
+    competition_sources = get_action_input("competition_sources", as_list=True)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
         meta = create_kernel_meta(
-            id, title, os.path.basename(code_file), competition_source
+            id, title, os.path.basename(code_file), competition_sources
         )
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
