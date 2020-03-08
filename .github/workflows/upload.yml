@@ -15,11 +15,10 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: test-script
-          title: test-script
+          slug: test-script-${{ github.ref }}
+          title: test-script-${{ github.ref }}
           code_file: ./src/main.py
           language: python
           kernel_type: script
           competition_sources: |
             m5-forecasting-accuracy
-          slug_suffix: -${{ github.ref }}
