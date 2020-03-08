@@ -20,5 +20,6 @@ jobs:
           code_file: ./src/main.py
           language: python
           kernel_type: script
+          is_private: false
           competition_sources: |
             m5-forecasting-accuracy
