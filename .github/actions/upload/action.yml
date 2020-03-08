@@ -3,7 +3,7 @@ author: harupy
 description: Push Keggle Kernel
 inputs:
   slug:
-    description: Kernel slug.
+    description: Kernel slug (must be at least five characters).
     required: true
   title:
     description: Kernel title (must be at least five characters).
