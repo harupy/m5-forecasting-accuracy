@@ -91,8 +91,8 @@ def main():
     is_private = get_action_input("is_private")
     enable_gpu = get_action_input("enable_gpu")
     enable_internet = get_action_input("enable_internet")
-    competition_sources = get_action_input("competition_sources", as_list=True)
     dataset_sources = get_action_input("dataset_sources", as_list=True)
+    competition_sources = get_action_input("competition_sources", as_list=True)
     kernel_sources = get_action_input("kernel_sources", as_list=True)
 
     script_name = os.path.basename(code_file)
