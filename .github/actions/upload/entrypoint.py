@@ -38,19 +38,32 @@ def run_command(command, verbose=True):
     return p.returncode
 
 
-def create_kernel_meta(id, title, code_file, competition_sources):
+def create_kernel_meta(
+    username,
+    slug,
+    title,
+    code_file,
+    language,
+    kernel_type,
+    is_private,
+    enable_gpu,
+    enable_internet,
+    dataset_sources,
+    competition_sources,
+    kernel_sources,
+):
     return {
-        "id": id,
+        "id": f"{username}/{slug}",
         "title": title,
         "code_file": code_file,
-        "language": "python",
-        "kernel_type": "script",
-        "is_private": "false",
-        "enable_gpu": "false",
-        "enable_internet": "false",
-        "dataset_sources": [],
+        "language": language,
+        "kernel_type": kernel_type,
+        "is_private": is_private,
+        "enable_gpu": enable_gpu,
+        "enable_internet": enable_internet,
+        "dataset_sources": dataset_sources,
         "competition_sources": competition_sources,
-        "kernel_sources": [],
+        "kernel_sources": kernel_sources,
     }
 
 
@@ -69,17 +82,36 @@ def get_action_input(name, as_list=False):
 
 def main():
     username = os.getenv("KAGGLE_USERNAME")
-    kernel_slug = get_action_input("slug")
+    slug = get_action_input("slug")
     title = get_action_input("title")
     code_file = get_action_input("code_file")
+    language = get_action_input("language")
+    kernel_type = get_action_input("kernel_type")
+    is_private = get_action_input("is_private")
+    enable_gpu = get_action_input("enable_gpu")
+    enable_internet = get_action_input("enable_internet")
     competition_sources = get_action_input("competition_sources", as_list=True)
+    dataset_sources = get_action_input("dataset_sources", as_list=True)
+    kernel_sources = get_action_input("kernel_sources", as_list=True)
 
-    kernel_id = f"{username}/{kernel_slug}"
     script_name = os.path.basename(code_file)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
-        meta = create_kernel_meta(kernel_id, title, script_name, competition_sources,)
+        meta = create_kernel_meta(
+            username,
+            slug,
+            title,
+            code_file,
+            language,
+            kernel_type,
+            is_private,
+            enable_gpu,
+            enable_internet,
+            dataset_sources,
+            competition_sources,
+            kernel_sources,
+        )
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
         # Copy script to tmpdir.
