@@ -11,9 +11,35 @@ inputs:
   code_file:
     description: Path to a kernel to push (relative from the repo root).
     required: true
+  kernel_type:
+    description: Type of kernel. Valid options are 'all', 'script', and 'notebook'.
+    required: false
+    default: 'all'
+  is_private:
+    description: Whether or not kernel should be private.
+    required: false
+    default: 'false'
+  enable_gpu:
+    description: Whether or not kernel should run on a GPU.
+    required: false
+    default: 'false'
+  enable_internet:
+    description: Whether or not kernel should be able to access the internet.
+    required: false
+    default: 'false'
+  dataset_sources:
+    description: A list of data sources that kernel should use. Each dataset is specified as {username}/{dataset-slug}.
+    required: false
+    default: ''
   competition_sources:
-    description: Competition slug (e.g. home-credit-default-risk).
-    required: true
+    description: A list of competition data sources that kernel should use.
+    required: false
+    default: ''
+  kernel_sources:
+    description: A list of kernel data sources that kernel should use. Each dataset is specified as {username}/{kernel-slug}.
+    required: false
+    default: ''
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
