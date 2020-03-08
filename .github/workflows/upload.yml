@@ -1,7 +1,6 @@
 name: Upload
 on:
-  pull_request:
-    types: [opened, synchronize]
+  push:
     branches:
       - master
 jobs:
@@ -15,8 +14,8 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: m5-${{ github.head_ref }}
-          title: m5-${{ github.head_ref }}
+          slug: ${{ github.sha }}
+          title: ${{ github.sha }}
           code_file: ./src/main.py
           language: python
           kernel_type: script
