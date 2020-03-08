@@ -1,0 +1,25 @@
+name: Upload
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - master
+jobs:
+  upload:
+    name: Upload Kernel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/upload
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        with:
+          slug: ${{ github.head_ref }}
+          title: ${{ github.head_ref }}
+          code_file: ./src/main.py
+          language: python
+          kernel_type: script
+          is_private: false
+          competition_sources: |
+            m5-forecasting-accuracy
