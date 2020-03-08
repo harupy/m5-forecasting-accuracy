@@ -98,14 +98,17 @@ def main():
     slug_prefix = get_action_input("slug_prefix")
     slug_suffix = get_action_input("slug_suffix")
 
+    slug = f"{slug_prefix}{slug}{slug_suffix}"
+    title = f"{slug_prefix}{title}{slug_suffix}"
+
     script_name = os.path.basename(code_file)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
         kernel_meta = create_kernel_meta(
             username,
-            f"{slug_prefix}{slug}{slug_suffix}",
-            f"{slug_prefix}{title}{slug_suffix}",
+            slug,
+            title,
             script_name,
             language,
             kernel_type,
