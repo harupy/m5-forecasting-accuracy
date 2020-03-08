@@ -3,13 +3,13 @@ author: harupy
 description: Push Keggle Kernel
 inputs:
   slug:
-    description: Kernel slug (must be at least five characters).
+    description: Slug of kernel (must be at least five characters).
     required: true
   title:
-    description: Kernel title (must be at least five characters).
+    description: Title of kernel (must be at least five characters).
     required: true
   code_file:
-    description: Path to a kernel to push (relative from the repo root).
+    description: Path to kernel to push (relative from the repo root).
     required: true
   language:
     description: Language that kernel is written in. Valid options are ['python', 'r', 'rmarkdown'].

@@ -1,11 +1,15 @@
 # mac
 .DS_Store
 
-# mlflwo
+# mlflow
 mlruns/
 
 # vscode
 .vscode/
+
+# kaggle data
+input/
+submission.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
