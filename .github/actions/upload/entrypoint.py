@@ -99,7 +99,7 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
-        meta = create_kernel_meta(
+        kernel_meta = create_kernel_meta(
             username,
             slug,
             title,
@@ -113,8 +113,7 @@ def main():
             competition_sources,
             kernel_sources,
         )
-        print(meta)
-        to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
+        to_json(kernel_meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
         # Copy script to tmpdir.
         dst = os.path.join(tmpdir, script_name)
