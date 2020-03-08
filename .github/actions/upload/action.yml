@@ -22,7 +22,7 @@ inputs:
   is_private:
     description: Whether or not kernel should be private.
     required: false
-    default: 'false'
+    default: 'true'
   enable_gpu:
     description: Whether or not kernel should run on a GPU.
     required: false
