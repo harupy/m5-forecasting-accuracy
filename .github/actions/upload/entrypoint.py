@@ -75,6 +75,7 @@ def main():
         meta = create_kernel_meta(
             f"{username}/{kernel_slug}", title, script_name, competition_sources,
         )
+        print(meta)
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
         # Copy script to tmpdir.

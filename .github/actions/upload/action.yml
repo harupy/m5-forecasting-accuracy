@@ -11,7 +11,7 @@ inputs:
   code_file:
     description: Path to a kernel to push (relative from the repo root).
     required: true
-  competition_source:
+  competition_sources:
     description: Competition slug (e.g. home-credit-default-risk).
     required: true
 runs:
