@@ -6,7 +6,7 @@ inputs:
     description: Kernel ID
     required: true
   title:
-    description: Kernel tittle
+    description: Kernel title (must be at least five characters).
     required: true
   code_file:
     description: Path to a kernel to push (relative from the repo root).

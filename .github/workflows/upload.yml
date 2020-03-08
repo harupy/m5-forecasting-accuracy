@@ -16,6 +16,6 @@ jobs:
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
           id: test
-          title: test
+          title: test-script
           code_file: ./src/main.py
           competition_source: m5-forecasting-accuracy
