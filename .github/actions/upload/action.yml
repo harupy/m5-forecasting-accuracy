@@ -14,7 +14,7 @@ inputs:
   language:
     description: Language that kernel is written in. Valid options are 'python', 'r', and 'rmarkdown'.
     required: false
-    default: 'all'
+    default: 'python'
   kernel_type:
     description: Type of kernel. Valid options are 'all', 'script', and 'notebook'.
     required: false
