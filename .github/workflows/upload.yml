@@ -19,7 +19,7 @@ jobs:
           title: ${{ github.head_ref }}
           code_file: ./src/main.py
           language: python
-          kernel_type: script
+          kernel_type: notebook
           is_private: false
           competition_sources: |
             m5-forecasting-accuracy
