@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import tempfile
 import subprocess
@@ -18,7 +19,11 @@ def run_command(command, verbose=True):
     stdout, stderr = p.communicate()
 
     stdout = stdout.decode("utf-8")
-    stderr = stderr.decode("utf-8")
+    stderr = stderr.decode("utf-8")  # stderr contains warnings.
+
+    if p.returncode != os.EX_OK:
+        print(stderr)
+        raise sys.exit(p.returncode)
 
     if verbose:
         if stdout != "":
