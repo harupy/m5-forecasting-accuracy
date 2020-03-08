@@ -19,6 +19,7 @@ inputs:
     required: true
   is_private:
     description: Whether or not kernel should be private.
+    enum: test
     required: false
     default: 'true'
   enable_gpu:
