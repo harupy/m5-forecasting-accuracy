@@ -29,11 +29,9 @@ def run_command(command, verbose=True):
 
     if verbose:
         if stdout != "":
-            print("----- stdout -----")
             print(stdout)
 
         if stderr != "":
-            print("----- stderr -----")
             print(stderr)
 
     return p.returncode
