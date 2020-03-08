@@ -23,6 +23,7 @@ def run_command(command, verbose=True):
 
     if p.returncode != os.EX_OK:
         print("Return code:", p.returncode)
+        print(stdout)
         print(stderr)
         raise sys.exit(p.returncode)
 
