@@ -95,13 +95,16 @@ def main():
     competition_sources = get_action_input("competition_sources", as_list=True)
     kernel_sources = get_action_input("kernel_sources", as_list=True)
 
+    slug_prefix = get_action_input("slug_prefix")
+    slug_suffix = get_action_input("slug_suffix")
+
     script_name = os.path.basename(code_file)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
         kernel_meta = create_kernel_meta(
             username,
-            slug,
+            f"{slug_prefix}{slug}{slug_suffix}",
             title,
             script_name,
             language,

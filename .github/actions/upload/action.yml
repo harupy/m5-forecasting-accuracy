@@ -41,6 +41,14 @@ inputs:
     description: A list of kernel data sources that kernel should use. Each dataset is specified as {username}/{kernel-slug}.
     required: false
     default: ''
+  slug_prefix:
+    description: A prefix to add to the kernel slug.
+    required: false
+    default: ''
+  slug_suffix:
+    description: A suffix to add to the kernel slug.
+    required: false
+    default: ''
 
 runs:
   using: 'docker'
