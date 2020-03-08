@@ -2,8 +2,8 @@ name: Push Kaggle Kernel
 author: harupy
 description: Push Keggle Kernel
 inputs:
-  id:
-    description: Kernel ID
+  slug:
+    description: Kernel slug.
     required: true
   title:
     description: Kernel title (must be at least five characters).

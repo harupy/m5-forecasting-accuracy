@@ -57,7 +57,8 @@ def get_action_input(name, as_list=False):
 
 
 def main():
-    id = get_action_input("id")
+    username = os.getenv("KAGGLE_USERNAME")
+    kernel_slug = get_action_input("slug")
     title = get_action_input("title")
     code_file = get_action_input("code_file")
     competition_sources = get_action_input("competition_sources", as_list=True)
@@ -65,7 +66,10 @@ def main():
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
         meta = create_kernel_meta(
-            id, title, os.path.basename(code_file), competition_sources
+            f"{username}/{kernel_slug}",
+            title,
+            os.path.basename(code_file),
+            competition_sources,
         )
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
