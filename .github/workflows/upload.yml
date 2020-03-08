@@ -15,8 +15,8 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: test-script-${{ github.head_ref }}
-          title: test-script-${{ github.head_ref }}
+          slug: ${{ github.head_ref }}
+          title: ${{ github.head_ref }}
           code_file: ./src/main.py
           language: python
           kernel_type: script
