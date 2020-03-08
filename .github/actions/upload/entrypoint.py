@@ -22,12 +22,12 @@ def run_command(command, verbose=True):
 
     if verbose:
         if stdout != "":
-            print("----- stdout -----\n")
-            print(stdout.decode("utf-8"))
+            print("----- stdout -----")
+            print(stdout)
 
         if stderr != "":
-            print("----- stderr -----\n")
-            print(stderr.decode("utf-8"))
+            print("----- stderr -----")
+            print(stderr)
 
     return p.returncode
 
