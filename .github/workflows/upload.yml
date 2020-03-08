@@ -22,4 +22,4 @@ jobs:
           kernel_type: script
           competition_sources: |
             m5-forecasting-accuracy
-          slug_suffix: -${{ github.sha }}
+          # slug_suffix: -${{ github.sha }}
