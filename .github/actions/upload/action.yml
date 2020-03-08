@@ -13,12 +13,10 @@ inputs:
     required: true
   language:
     description: Language that kernel is written in. Valid options are ['python', 'r', 'rmarkdown'].
-    required: false
-    default: 'python'
+    required: true
   kernel_type:
     description: Type of kernel. Valid options are ['script', 'notebook'].
-    required: false
-    default: 'notebook'
+    required: true
   is_private:
     description: Whether or not kernel should be private.
     required: false

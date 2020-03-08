@@ -18,6 +18,7 @@ jobs:
           slug: test-script
           title: test-script
           code_file: ./src/main.py
+          language: python
           kernel_type: script
           competition_sources: |
             m5-forecasting-accuracy
