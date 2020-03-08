@@ -17,12 +17,17 @@ def run_command(command, verbose=True):
     )
     stdout, stderr = p.communicate()
 
-    if verbose:
-        print("----- stdout -----\n")
-        print(stdout.decode("utf-8"))
+    stdout = stdout.decode("utf-8")
+    stderr = stderr.decode("utf-8")
 
-        print("----- stderr -----\n")
-        print(stderr.decode("utf-8"))
+    if verbose:
+        if stdout != "":
+            print("----- stdout -----\n")
+            print(stdout.decode("utf-8"))
+
+        if stderr != "":
+            print("----- stderr -----\n")
+            print(stderr.decode("utf-8"))
 
     return p.returncode
 
