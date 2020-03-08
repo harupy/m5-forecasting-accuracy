@@ -1,0 +1,19 @@
+name: Push Kaggle Kernel
+author: harupy
+description: Push Keggle Kernel
+inputs:
+  id:
+    description: Kernel ID
+    required: true
+  title:
+    description: Kernel tittle
+    required: true
+  code_file:
+    description: Path to a kernel to push (relative from the repo root).
+    required: true
+  competition_source:
+    description: Competition slug (e.g. home-credit-default-risk).
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
