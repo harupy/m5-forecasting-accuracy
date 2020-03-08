@@ -22,6 +22,7 @@ def run_command(command, verbose=True):
     stderr = stderr.decode("utf-8")  # stderr contains warnings.
 
     if p.returncode != os.EX_OK:
+        print("Return code:", p.returncode)
         print(stderr)
         raise sys.exit(p.returncode)
 
