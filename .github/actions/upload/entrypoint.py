@@ -103,7 +103,7 @@ def main():
             username,
             slug,
             title,
-            code_file,
+            script_name,
             language,
             kernel_type,
             is_private,
