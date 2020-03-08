@@ -68,14 +68,12 @@ def main():
     code_file = get_action_input("code_file")
     competition_sources = get_action_input("competition_sources", as_list=True)
 
+    kernel_id = f"{username}/{kernel_slug}"
     script_name = os.path.basename(code_file)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save kernel metadata to tmpdir.
-        meta = create_kernel_meta(
-            f"{username}/{kernel_slug}", title, script_name, competition_sources,
-        )
-        print(meta)
+        meta = create_kernel_meta(kernel_id, title, script_name, competition_sources,)
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
         # Copy script to tmpdir.
@@ -83,7 +81,7 @@ def main():
         shutil.copyfile(code_file, dst)
 
         run_command(f"kaggle kernels push -p {tmpdir}")
-        run_command(f"kaggle kernels status")
+        run_command(f"kaggle kernels status {kernel_id}")
 
 
 if __name__ == "__main__":
