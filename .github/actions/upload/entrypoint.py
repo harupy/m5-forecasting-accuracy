@@ -113,6 +113,7 @@ def main():
             competition_sources,
             kernel_sources,
         )
+        print(meta)
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
         # Copy script to tmpdir.
