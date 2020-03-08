@@ -10,13 +10,21 @@ def to_json(data, path):
         json.dump(data, f, indent=2, sort_keys=True)
 
 
-def run_command(command):
+def run_command(command, verbose=True):
     print("Executing:", command)
     p = subprocess.Popen(
         [command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     stdout, stderr = p.communicate()
-    return p.returncode, stdout.decode("utf-8"), stderr.decode("utf-8")
+
+    if verbose:
+        print("----- stdout -----\n")
+        print(stdout.decode("utf-8"))
+
+        print("----- stderr -----\n")
+        print(stderr.decode("utf-8"))
+
+    return p.returncode
 
 
 def create_kernel_meta(id, title, code_file, competition_source):
