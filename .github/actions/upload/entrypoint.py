@@ -95,12 +95,6 @@ def main():
     competition_sources = get_action_input("competition_sources", as_list=True)
     kernel_sources = get_action_input("kernel_sources", as_list=True)
 
-    slug_prefix = get_action_input("slug_prefix")
-    slug_suffix = get_action_input("slug_suffix")
-
-    slug = f"{slug_prefix}{slug}{slug_suffix}"
-    title = f"{slug_prefix}{title}{slug_suffix}"
-
     script_name = os.path.basename(code_file)
 
     with tempfile.TemporaryDirectory() as tmpdir:
