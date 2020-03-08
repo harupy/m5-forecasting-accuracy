@@ -15,7 +15,7 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          id: test
+          slug: test
           title: test-script
           code_file: ./src/main.py
           competition_sources: |
