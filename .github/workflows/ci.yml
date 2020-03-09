@@ -1,0 +1,27 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: pip install -r requirement.txt
+
+      - name: Check formatting
+        run: black --check .
+
+      - name: Check notebook is updated.
+        run: |
+          ./tools/convert.sh
+          git diff
