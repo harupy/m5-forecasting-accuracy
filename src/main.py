@@ -1,8 +1,14 @@
 # %% [markdown]
+# This kernel is:
+# - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar!
+# - Automatically uploaded by [push-kaggle-kernel](https://github.com/harupy/push-kaggle-kernel).
+# - Formatted by [Black](https://github.com/psf/black)
+
+# %% [markdown]
 # # Objective
 #
 # * Make a baseline model that predict the validation (28 days).
-# * This competition has 2 stages, so the main objective is to make a model that can predict the demand for the next 28 days
+# * This competition has 2 stages, so the main objective is to make a model that can predict the demand for the next 28 days.
 
 # %% [code]
 import gc
@@ -334,7 +340,10 @@ def run_lgb(data):
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
-    preds.columns = ["id"] + ["F" + str(i + 1) for i in range(28)]
+    F_cols = ["F" + str(i + 1) for i in range(28)]
+    preds.columns = ["id"] + F_cols
+
+    assert preds[F_cols].isnull().sum().sum() == 0
 
     evals = submission[submission["id"].str.contains("evaluation")]
     vals = submission[["id"]].merge(preds, on="id")
@@ -345,19 +354,16 @@ def make_submission(test, submission):
 # %% [code]
 data = transform(data)
 data = feature_engineering(data)
-
-# reduce memory for new features so we can train.
 data = reduce_mem_usage(data)
 model, test = run_lgb(data)
 
 # %% [code]
 from mlflow_extend import plotting as mplt
 
-
 imp_type = "gain"
 features = model.feature_name()
 importances = model.feature_importance(imp_type)
-mplt.feature_importance(features, importances, imp_type, limit=30)
+_ = mplt.feature_importance(features, importances, imp_type, limit=30)
 
 # %% [code]
 make_submission(test, submission)
