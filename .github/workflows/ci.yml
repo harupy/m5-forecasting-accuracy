@@ -16,7 +16,7 @@ jobs:
           python-version: 3.7
 
       - name: Install dependencies
-        run: pip install -r requirement.txt
+        run: pip install -r requirements-dev.txt
 
       - name: Check formatting
         run: black --check .
