@@ -21,10 +21,10 @@ jobs:
       - name: Lint
         run: flake8 .
 
-      - name: Check formatting
+      - name: Formatting
         run: black --check .
 
-      - name: Check notebook is updated.
+      - name: Verify notebook is updated.
         run: |
           ./tools/convert.sh
           if [ ! -z "$(git diff)" ]; then
