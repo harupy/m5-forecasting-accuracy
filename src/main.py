@@ -6,7 +6,7 @@
 
 # %% [markdown]
 # # Objective
-#
+
 # * Make a baseline model that predict the validation (28 days).
 # * This competition has 2 stages, so the main objective is to make a model that can predict the demand for the next 28 days.
 
