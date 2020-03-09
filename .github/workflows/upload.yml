@@ -14,8 +14,8 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: ${{ github.sha }}
-          title: ${{ github.sha }}
+          slug: m5-baseline
+          title: m5-baseline
           code_file: ./src/main.ipynb
           language: python
           kernel_type: notebook
