@@ -184,9 +184,10 @@ def encode_categoricals(df):
         "event_name_2",
         "event_type_2",
     ]
-    for col in cat_cols:
-        encoder = LabelEncoder()
-        df[col] = encoder.fit_transform(df[col])
+
+    encoder = LabelEncoder()
+    df[cat_cols] = encoder.fit_transform(df[cat_cols])
+
     return df
 
 
