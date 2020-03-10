@@ -324,6 +324,7 @@ mask = data["date"] <= "2016-04-24"
 X_train = data[mask][features]
 y_train = data[mask]["demand"]
 X_test = data[~mask][features]
+id_date = data[~mask][["id", "date"]]
 
 del data
 gc.collect()
@@ -404,5 +405,4 @@ def make_submission(test, submission):
 
 
 # %% [code]
-test = X_test.assign(demand=preds)
-make_submission(test, submission)
+make_submission(id_date.assign(demand=preds), submission)
