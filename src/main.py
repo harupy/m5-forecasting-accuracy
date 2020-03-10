@@ -191,9 +191,9 @@ def encode_categoricals(df):
 
 
 def add_agg_features(df):
-    # rolling demand features
+    # rolling demand features.
     for shift in [28, 29, 30]:
-        df[f"lag_t{shift}"] = df.groupby(["id"])["demand"].transform(
+        df[f"shift_t{shift}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(shift)
         )
 
@@ -215,11 +215,11 @@ def add_agg_features(df):
     )
 
     # price features
-    df["lag_price_t1"] = df.groupby(["id"])["sell_price"].transform(
+    df["shift_price_t1"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1)
     )
-    df["price_change_t1"] = (df["lag_price_t1"] - df["sell_price"]) / (
-        df["lag_price_t1"]
+    df["price_change_t1"] = (df["shift_price_t1"] - df["sell_price"]) / (
+        df["shift_price_t1"]
     )
     df["rolling_price_max_t365"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1).rolling(365).max()
@@ -234,7 +234,7 @@ def add_agg_features(df):
     df["rolling_price_std_t30"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.rolling(30).std()
     )
-    return df.drop(["rolling_price_max_t365", "lag_price_t1"], axis=1)
+    return df.drop(["rolling_price_max_t365", "shift_price_t1"], axis=1)
 
 
 def add_time_features(df):
@@ -244,6 +244,7 @@ def add_time_features(df):
     df["week"] = df["date"].dt.week
     df["day"] = df["date"].dt.day
     df["dayofweek"] = df["date"].dt.dayofweek
+    df["is_weekend"] = df["dayofweek"].isin([5, 6])
     return df
 
 
@@ -297,9 +298,9 @@ features = [
     "snap_WI",
     "sell_price",
     # aggregation features.
-    "lag_t28",
-    "lag_t29",
-    "lag_t30",
+    "shift_t28",
+    "shift_t29",
+    "shift_t30",
     "rolling_mean_t7",
     "rolling_std_t7",
     "rolling_mean_t30",
