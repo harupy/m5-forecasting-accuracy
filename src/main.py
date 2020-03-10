@@ -88,17 +88,17 @@ def reduce_mem_usage(df, verbose=True):
 
 # %% [code]
 def read_data():
-    input_dir = "/kaggle/input" if on_kaggle() else "input"
-    input_dir = f"{input_dir}/m5-forecasting-accuracy"
+    INPUT_DIR = "/kaggle/input" if on_kaggle() else "input"
+    INPUT_DIR = f"{INPUT_DIR}/m5-forecasting-accuracy"
 
     print("Reading files...")
 
-    calendar = pd.read_csv(f"{input_dir}/calendar.csv").pipe(reduce_mem_usage)
-    sell_prices = pd.read_csv(f"{input_dir}/sell_prices.csv").pipe(reduce_mem_usage)
-    sales_train_val = pd.read_csv(f"{input_dir}/sales_train_validation.csv").pipe(
+    calendar = pd.read_csv(f"{INPUT_DIR}/calendar.csv").pipe(reduce_mem_usage)
+    sell_prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
+    sales_train_val = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv").pipe(
         reduce_mem_usage
     )
-    submission = pd.read_csv(f"{input_dir}/sample_submission.csv").pipe(
+    submission = pd.read_csv(f"{INPUT_DIR}/sample_submission.csv").pipe(
         reduce_mem_usage
     )
 
@@ -435,7 +435,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
-    F_cols = ["F" + str(i + 1) for i in range(28)]
+    F_cols = ["F" + str(x + 1) for x in range(28)]
     preds.columns = ["id"] + F_cols
 
     assert preds[F_cols].isnull().sum().sum() == 0
