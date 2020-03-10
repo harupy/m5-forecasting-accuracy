@@ -26,6 +26,14 @@ warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.max_rows", 500)
 
+# %% [code]
+import IPython
+
+
+def display(*dfs, head=True):
+    for df in dfs:
+        IPython.display.display(df.head() if head else df)
+
 
 # %% [code]
 def on_kaggle():
@@ -108,7 +116,13 @@ calendar, sell_prices, sales_train_val, submission = read_data()
 
 # %% [code]
 def melt_and_merge(
-    calendar, sell_prices, sales_train_val, submission, nrows=55_000_000, merge=False,
+    calendar,
+    sell_prices,
+    sales_train_val,
+    submission,
+    nrows=55_000_000,
+    merge=False,
+    verbose=True,
 ):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
@@ -117,9 +131,15 @@ def melt_and_merge(
     )
     sales_train_val = reduce_mem_usage(sales_train_val)
 
+    if verbose:
+        display(sales_train_val)
+
     # separate test dataframes.
     test1 = submission[submission["id"].str.contains("validation")]
     test2 = submission[submission["id"].str.contains("evaluation")]
+
+    if verbose:
+        display(test1, test2)
 
     # change column names.
     test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + 28)]
@@ -134,14 +154,23 @@ def melt_and_merge(
     test2 = test2.merge(product, how="left", on="id")
     test2["id"] = test2["id"].str.replace("_validation", "_evaluation")
 
-    test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand",)
-    test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand",)
+    if verbose:
+        display(test1, test2)
+
+    test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
+    test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand")
+
+    if verbose:
+        display(test1, test2)
 
     sales_train_val["part"] = "train"
     test1["part"] = "test1"
     test2["part"] = "test2"
 
     data = pd.concat([sales_train_val, test1, test2], axis=0)
+
+    if verbose:
+        display(data)
 
     del sales_train_val, test1, test2
 
@@ -159,10 +188,17 @@ def melt_and_merge(
         data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
         data = data.drop(["d", "day"], axis=1)
 
+        if verbose:
+            display(data)
+
         # get the sell price data (this feature should be very important).
         data = data.merge(
             sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left"
         )
+
+        if verbose:
+            display(data)
+
     gc.collect()
 
     return data
