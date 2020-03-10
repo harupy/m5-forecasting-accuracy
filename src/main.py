@@ -435,7 +435,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
-    F_cols = ["F" + str(i + 1) for i in range(28)]
+    F_cols = ["F" + str(x + 1) for x in range(28)]
     preds.columns = ["id"] + F_cols
 
     assert preds[F_cols].isnull().sum().sum() == 0
