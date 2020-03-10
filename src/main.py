@@ -34,7 +34,7 @@ def on_kaggle():
 
 # %% [code]
 if on_kaggle():
-    os.system("pip install mlflow_extend")
+    os.system("pip install --quiet mlflow_extend")
 
 
 # %% [code]
