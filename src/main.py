@@ -2,7 +2,7 @@
 # This kernel is:
 # - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar!
 # - Automatically uploaded by [push-kaggle-kernel](https://github.com/harupy/push-kaggle-kernel).
-# - Formatted by [Black](https://github.com/psf/black)
+# - Formatted by [Black](https://github.com/psf/black).
 
 # %% [markdown]
 # # Objective
@@ -19,7 +19,9 @@ import warnings
 import pandas as pd
 import numpy as np
 import lightgbm as lgb
-from sklearn import preprocessing, metrics
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import TimeSeriesSplit
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
@@ -38,6 +40,7 @@ if on_kaggle():
     sys.path.append("m5-forecasting-accuracy/src")
 else:
     sys.path.append("src")
+
 
 # %% [code]
 def reduce_mem_usage(df, verbose=True):
@@ -80,8 +83,6 @@ def reduce_mem_usage(df, verbose=True):
     return df
 
 
-# function to read the data and merge it (ignoring some columns, this is a very fst model)
-
 # %% [code]
 def read_data():
     input_dir = "/kaggle/input" if on_kaggle() else "input"
@@ -106,6 +107,11 @@ def read_data():
     return calendar, sell_prices, sales_train_val, submission
 
 
+# %% [code]
+calendar, sell_prices, sales_train_val, submission = read_data()
+
+
+# %% [code]
 def melt_and_merge(
     calendar, sell_prices, sales_train_val, submission, nrows=55_000_000, merge=False,
 ):
@@ -167,19 +173,10 @@ def melt_and_merge(
 
 
 # %% [code]
-calendar, sell_prices, sales_train_val, submission = read_data()
-data = melt_and_merge(
-    calendar, sell_prices, sales_train_val, submission, nrows=27_500_000, merge=True
-)
-
-# %% [markdown]
-# * We have the data to build our first model, let's build a baseline and predict the validation data (in our case is test1)
-
-# %% [code]
-def transform(data):
+def encode_categoricals(df):
     nan_features = ["event_name_1", "event_type_1", "event_name_2", "event_type_2"]
     for feature in nan_features:
-        data[feature] = data[feature].fillna("MISSING")
+        df[feature] = df[feature].fillna("MISSING")
 
     cat_cols = [
         "item_id",
@@ -193,150 +190,211 @@ def transform(data):
         "event_type_2",
     ]
     for col in cat_cols:
-        encoder = preprocessing.LabelEncoder()
-        data[col] = encoder.fit_transform(data[col])
+        encoder = LabelEncoder()
+        df[col] = encoder.fit_transform(df[col])
+    return df
 
-    return data
 
-
-def feature_engineering(data):
+def add_agg_features(df):
     # rolling demand features
     for shift in [28, 29, 30]:
-        data[f"lag_t{shift}"] = data.groupby(["id"])["demand"].transform(
+        df[f"lag_t{shift}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(shift)
         )
 
     for size in [7, 30]:
-        data[f"rolling_std_t{size}"] = data.groupby(["id"])["demand"].transform(
+        df[f"rolling_std_t{size}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(28).rolling(size).std()
         )
 
     for size in [7, 30, 90, 180]:
-        data[f"rolling_mean_t{size}"] = data.groupby(["id"])["demand"].transform(
+        df[f"rolling_mean_t{size}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(28).rolling(size).mean()
         )
 
-    data["rolling_skew_t30"] = data.groupby(["id"])["demand"].transform(
+    df["rolling_skew_t30"] = df.groupby(["id"])["demand"].transform(
         lambda x: x.shift(28).rolling(30).skew()
     )
-    data["rolling_kurt_t30"] = data.groupby(["id"])["demand"].transform(
+    df["rolling_kurt_t30"] = df.groupby(["id"])["demand"].transform(
         lambda x: x.shift(28).rolling(30).kurt()
     )
 
     # price features
-    data["lag_price_t1"] = data.groupby(["id"])["sell_price"].transform(
+    df["lag_price_t1"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1)
     )
-    data["price_change_t1"] = (data["lag_price_t1"] - data["sell_price"]) / (
-        data["lag_price_t1"]
+    df["price_change_t1"] = (df["lag_price_t1"] - df["sell_price"]) / (
+        df["lag_price_t1"]
     )
-    data["rolling_price_max_t365"] = data.groupby(["id"])["sell_price"].transform(
+    df["rolling_price_max_t365"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1).rolling(365).max()
     )
-    data["price_change_t365"] = (
-        data["rolling_price_max_t365"] - data["sell_price"]
-    ) / (data["rolling_price_max_t365"])
+    df["price_change_t365"] = (df["rolling_price_max_t365"] - df["sell_price"]) / (
+        df["rolling_price_max_t365"]
+    )
 
-    data["rolling_price_std_t7"] = data.groupby(["id"])["sell_price"].transform(
+    df["rolling_price_std_t7"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.rolling(7).std()
     )
-    data["rolling_price_std_t30"] = data.groupby(["id"])["sell_price"].transform(
+    df["rolling_price_std_t30"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.rolling(30).std()
     )
-    data = data.drop(["rolling_price_max_t365", "lag_price_t1"], axis=1)
-
-    # time features
-    data["date"] = pd.to_datetime(data["date"])
-    data["year"] = data["date"].dt.year
-    data["month"] = data["date"].dt.month
-    data["week"] = data["date"].dt.week
-    data["day"] = data["date"].dt.day
-    data["dayofweek"] = data["date"].dt.dayofweek
-
-    return data
+    return df.drop(["rolling_price_max_t365", "lag_price_t1"], axis=1)
 
 
-def run_lgb(data):
-    features = [
-        "item_id",
-        "dept_id",
-        "cat_id",
-        "store_id",
-        "state_id",
-        "event_name_1",
-        "event_type_1",
-        "event_name_2",
-        "event_type_2",
-        "snap_CA",
-        "snap_TX",
-        "snap_WI",
-        "sell_price",
-        "lag_t28",
-        "lag_t29",
-        "lag_t30",
-        "rolling_mean_t7",
-        "rolling_std_t7",
-        "rolling_mean_t30",
-        "rolling_mean_t90",
-        "rolling_mean_t180",
-        "rolling_std_t30",
-        "price_change_t1",
-        "price_change_t365",
-        "rolling_price_std_t7",
-        "rolling_price_std_t30",
-        "rolling_skew_t30",
-        "rolling_kurt_t30",
-        "year",
-        "month",
-        "week",
-        "day",
-        "dayofweek",
-    ]
-
-    # going to evaluate with the last 28 days
-    mask1 = data["date"] <= "2016-03-27"
-    mask2 = data["date"] <= "2016-04-24"
-    X_train = data[mask1]
-    y_train = X_train.pop("demand")
-    X_val = data[~mask1 & mask2]
-    y_val = X_val.pop("demand")
-    X_test = data[~mask2].drop("demand", axis=1)
-    del data
-    gc.collect()
-
-    # define random hyperparammeters
-    params = {
-        "boosting_type": "gbdt",
-        "metric": "rmse",
-        "objective": "regression",
-        "n_jobs": -1,
-        "seed": 42,
-        "learning_rate": 0.1,
-        "bagging_fraction": 0.75,
-        "bagging_freq": 10,
-        "colsample_bytree": 0.75,
-    }
-
-    fit_params = {
-        "num_boost_round": 100_000,
-        "early_stopping_rounds": 50,
-        "verbose_eval": 100,
-    }
-
-    train_set = lgb.Dataset(X_train[features], y_train)
-    val_set = lgb.Dataset(X_val[features], y_val)
-
-    del X_train, y_train
-
-    model = lgb.train(params, train_set, valid_sets=[train_set, val_set], **fit_params)
-
-    val_pred = model.predict(X_val[features])
-    val_rmse = np.sqrt(metrics.mean_squared_error(val_pred, y_val))
-    print(f"RMSE:", val_rmse)
-    y_pred = model.predict(X_test[features])
-    return model, X_test.assign(demand=y_pred)
+def add_time_features(df):
+    df["date"] = pd.to_datetime(df["date"])
+    df["year"] = df["date"].dt.year
+    df["month"] = df["date"].dt.month
+    df["week"] = df["date"].dt.week
+    df["day"] = df["date"].dt.day
+    df["dayofweek"] = df["date"].dt.dayofweek
+    return df
 
 
+# %% [code]
+data = melt_and_merge(
+    calendar, sell_prices, sales_train_val, submission, nrows=27_500_000, merge=True
+)
+data = encode_categoricals(data)
+data = add_agg_features(data)
+data = add_time_features(data)
+data = reduce_mem_usage(data)
+
+
+# %% [code]
+def run_lgb(bst_params, fit_params, X_train, y_train, cv):
+    models = []
+
+    for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X_train, y_train)):
+        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()})----------\n")
+        X_trn, X_val = X_train.iloc[idx_trn], X_train.iloc[idx_val]
+        y_trn, y_val = y_train.iloc[idx_trn], y_train.iloc[idx_val]
+        train_set = lgb.Dataset(X_trn, label=y_trn)
+        val_set = lgb.Dataset(X_val, label=y_val)
+
+        model = lgb.train(
+            bst_params,
+            train_set,
+            valid_sets=[train_set, val_set],
+            valid_names=["train", "valid"],
+            **fit_params,
+        )
+        models.append(model)
+
+    return models
+
+
+# %% [code]
+features = [
+    "item_id",
+    "dept_id",
+    "cat_id",
+    "store_id",
+    "state_id",
+    "event_name_1",
+    "event_type_1",
+    "event_name_2",
+    "event_type_2",
+    "snap_CA",
+    "snap_TX",
+    "snap_WI",
+    "sell_price",
+    # aggregation features.
+    "lag_t28",
+    "lag_t29",
+    "lag_t30",
+    "rolling_mean_t7",
+    "rolling_std_t7",
+    "rolling_mean_t30",
+    "rolling_mean_t90",
+    "rolling_mean_t180",
+    "rolling_std_t30",
+    "price_change_t1",
+    "price_change_t365",
+    "rolling_price_std_t7",
+    "rolling_price_std_t30",
+    "rolling_skew_t30",
+    "rolling_kurt_t30",
+    # time features.
+    "year",
+    "month",
+    "week",
+    "day",
+    "dayofweek",
+]
+
+# prepare training and test data.
+mask = data["date"] <= "2016-04-24"
+X_train = data[mask][features]
+y_train = data[mask]["demand"]
+X_test = data[~mask][features]
+
+del data
+gc.collect()
+
+# %% [code]
+bst_params = {
+    "boosting_type": "gbdt",
+    "metric": "rmse",
+    "objective": "regression",
+    "n_jobs": -1,
+    "seed": 42,
+    "learning_rate": 0.1,
+    "bagging_fraction": 0.75,
+    "bagging_freq": 10,
+    "colsample_bytree": 0.75,
+}
+
+fit_params = {
+    "num_boost_round": 100_000,
+    "early_stopping_rounds": 50,
+    "verbose_eval": 100,
+}
+
+cv = TimeSeriesSplit(n_splits=5)
+models = run_lgb(bst_params, fit_params, X_train, y_train, cv)
+
+
+# %% [code]
+def rmse(y_true, y_pred):
+    return np.sqrt(mean_squared_error(y_true, y_pred))
+
+
+# %% [code]
+imp_type = "gain"
+importances = np.zeros(X_train.shape[0])
+preds = np.zeros(X_test.shape[0])
+
+for model in models:
+    preds += model.predict(X_test)
+    importances += model.feature_importance(imp_type)
+
+# Take the average over folds.
+preds = preds / cv.get_n_splits()
+importances = importances / cv.get_n_splits()
+
+
+# %% [code]
+# https://github.com/harupy/mlflow-extend
+from mlflow_extend import mlflow
+from mlflow_extend import plotting as mplt
+
+with mlflow.start_run():
+    mlflow.log_params_flatten(
+        {
+            "bst": bst_params,
+            "fit": fit_params,
+            "cv": {"type": str(TimeSeriesSplit), "n_splits": cv.get_n_splits()},
+        }
+    )
+
+
+features = models[0].feature_name()
+mplt.feature_importance(features, importances, imp_type, limit=30)
+
+
+# %% [code]
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
@@ -352,18 +410,5 @@ def make_submission(test, submission):
 
 
 # %% [code]
-data = transform(data)
-data = feature_engineering(data)
-data = reduce_mem_usage(data)
-model, test = run_lgb(data)
-
-# %% [code]
-from mlflow_extend import plotting as mplt
-
-imp_type = "gain"
-features = model.feature_name()
-importances = model.feature_importance(imp_type)
-_ = mplt.feature_importance(features, importances, imp_type, limit=30)
-
-# %% [code]
+test = X_test.assign(demand=preds)
 make_submission(test, submission)
