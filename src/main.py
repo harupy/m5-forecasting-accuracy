@@ -123,6 +123,7 @@ def melt(
     sales_train_val = pd.melt(
         sales_train_val, id_vars=id_columns, var_name="day", value_name="demand",
     )
+
     sales_train_val = reduce_mem_usage(sales_train_val)
 
     if verbose:
@@ -363,7 +364,7 @@ mask = data["date"] <= "2016-04-24"
 X_train = data[mask][features]
 y_train = data[mask]["demand"]
 X_test = data[~mask][features]
-id_date = data[~mask][["id", "date"]]
+id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
 
 del data
 gc.collect()
@@ -436,11 +437,12 @@ def make_submission(test, submission):
     F_cols = ["F" + str(x + 1) for x in range(28)]
     preds.columns = ["id"] + F_cols
 
-    assert preds[F_cols].isnull().sum().sum() == 0
-
     evals = submission[submission["id"].str.contains("evaluation")]
-    vals = submission[["id"]].merge(preds, on="id")
+    vals = submission[["id"]].merge(preds, how="inner", on="id")
     final = pd.concat([vals, evals])
+
+    assert final[F_cols].isnull().sum().sum() == 0
+
     final.to_csv("submission.csv", index=False)
 
 
