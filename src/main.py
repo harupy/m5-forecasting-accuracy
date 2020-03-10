@@ -201,7 +201,7 @@ def merge(data, calendar, sell_prices, verbose=True):
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=27_500_000, merge=True)
+data = melt(sales_train_val, submission, nrows=27_500_000)
 data = merge(data, calendar, sell_prices)
 data = reduce_mem_usage(data)
 
