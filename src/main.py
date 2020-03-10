@@ -158,6 +158,7 @@ def melt_and_merge(
         # notebook crashes with the entire dataset.
         data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
         data = data.drop(["d", "day"], axis=1)
+
         # get the sell price data (this feature should be very important).
         data = data.merge(
             sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left"
