@@ -13,7 +13,6 @@
 # %% [code]
 import gc
 import os
-import sys
 import warnings
 
 import pandas as pd
@@ -35,11 +34,7 @@ def on_kaggle():
 
 # %% [code]
 if on_kaggle():
-    os.system("git clone https://github.com/harupy/m5-forecasting-accuracy")
     os.system("pip install mlflow_extend")
-    sys.path.append("m5-forecasting-accuracy/src")
-else:
-    sys.path.append("src")
 
 
 # %% [code]
@@ -267,7 +262,7 @@ def run_lgb(bst_params, fit_params, X_train, y_train, cv):
     models = []
 
     for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X_train, y_train)):
-        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()})----------\n")
+        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
         X_trn, X_val = X_train.iloc[idx_trn], X_train.iloc[idx_val]
         y_trn, y_val = y_train.iloc[idx_trn], y_train.iloc[idx_val]
         train_set = lgb.Dataset(X_trn, label=y_trn)
@@ -363,7 +358,7 @@ def rmse(y_true, y_pred):
 
 # %% [code]
 imp_type = "gain"
-importances = np.zeros(X_train.shape[0])
+importances = np.zeros(X_train.shape[1])
 preds = np.zeros(X_test.shape[0])
 
 for model in models:
@@ -377,8 +372,7 @@ importances = importances / cv.get_n_splits()
 
 # %% [code]
 # https://github.com/harupy/mlflow-extend
-from mlflow_extend import mlflow
-from mlflow_extend import plotting as mplt
+from mlflow_extend import mlflow, plotting as mplt
 
 with mlflow.start_run():
     mlflow.log_params_flatten(
