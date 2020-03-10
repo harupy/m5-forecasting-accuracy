@@ -117,15 +117,15 @@ def melt_and_merge(
     )
     sales_train_val = reduce_mem_usage(sales_train_val)
 
-    # separate test dataframes
+    # separate test dataframes.
     test1 = submission[submission["id"].str.contains("validation")]
     test2 = submission[submission["id"].str.contains("evaluation")]
 
-    # change column names
+    # change column names.
     test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + 28)]
     test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + 28)]
 
-    # get product table
+    # get product table.
     product = sales_train_val[id_columns].drop_duplicates()
 
     # merge with product table
@@ -145,20 +145,20 @@ def melt_and_merge(
 
     del sales_train_val, test1, test2
 
-    # get only a sample for fast training
+    # get only a sample for fast training.
     data = data.loc[nrows:]
 
-    # drop some calendar features
+    # drop some calendar features.
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
 
-    # delete test2 for now
+    # delete test2 for now.
     data = data[data["part"] != "test2"]
 
     if merge:
-        # notebook crashes with the entire dataset
+        # notebook crashes with the entire dataset.
         data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
         data = data.drop(["d", "day"], axis=1)
-        # get the sell price data (this feature should be very important)
+        # get the sell price data (this feature should be very important).
         data = data.merge(
             sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left"
         )
@@ -258,13 +258,14 @@ data = reduce_mem_usage(data)
 
 
 # %% [code]
-def run_lgb(bst_params, fit_params, X_train, y_train, cv):
+def train_lgb(bst_params, fit_params, X, y, cv):
     models = []
 
-    for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X_train, y_train)):
+    for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X, y)):
         print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
-        X_trn, X_val = X_train.iloc[idx_trn], X_train.iloc[idx_val]
-        y_trn, y_val = y_train.iloc[idx_trn], y_train.iloc[idx_val]
+
+        X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
+        y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
         train_set = lgb.Dataset(X_trn, label=y_trn)
         val_set = lgb.Dataset(X_val, label=y_val)
 
@@ -349,7 +350,7 @@ fit_params = {
 }
 
 cv = TimeSeriesSplit(n_splits=5)
-models = run_lgb(bst_params, fit_params, X_train, y_train, cv)
+models = train_lgb(bst_params, fit_params, X_train, y_train, cv)
 
 
 # %% [code]
@@ -370,9 +371,10 @@ for model in models:
 preds = preds / cv.get_n_splits()
 importances = importances / cv.get_n_splits()
 
+# %% [markdown]
+# https://github.com/harupy/mlflow-extend
 
 # %% [code]
-# https://github.com/harupy/mlflow-extend
 from mlflow_extend import mlflow, plotting as mplt
 
 with mlflow.start_run():
@@ -386,7 +388,7 @@ with mlflow.start_run():
 
 
 features = models[0].feature_name()
-mplt.feature_importance(features, importances, imp_type, limit=30)
+_ = mplt.feature_importance(features, importances, imp_type, limit=30)
 
 
 # %% [code]
