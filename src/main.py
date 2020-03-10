@@ -115,14 +115,8 @@ calendar, sell_prices, sales_train_val, submission = read_data()
 
 
 # %% [code]
-def melt_and_merge(
-    calendar,
-    sell_prices,
-    sales_train_val,
-    submission,
-    nrows=55_000_000,
-    merge=False,
-    verbose=True,
+def melt(
+    sales_train_val, submission, nrows=55_000_000, verbose=True,
 ):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
@@ -177,31 +171,38 @@ def melt_and_merge(
     # get only a sample for fast training.
     data = data.loc[nrows:]
 
-    # drop some calendar features.
-    calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
-
     # delete test2 for now.
     data = data[data["part"] != "test2"]
-
-    if merge:
-        # notebook crashes with the entire dataset.
-        data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
-        data = data.drop(["d", "day"], axis=1)
-
-        if verbose:
-            display(data)
-
-        # get the sell price data (this feature should be very important).
-        data = data.merge(
-            sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left"
-        )
-
-        if verbose:
-            display(data)
 
     gc.collect()
 
     return data
+
+
+def merge(data, calendar, sell_prices, verbose=True):
+    # drop some calendar features.
+    calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
+
+    # notebook crashes with the entire dataset.
+    data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
+    data = data.drop(["d", "day"], axis=1)
+
+    if verbose:
+        display(data)
+
+    # get the sell price data (this feature should be very important).
+    data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
+
+    if verbose:
+        display(data)
+
+    return data
+
+
+# %% [code]
+data = melt(sales_train_val, submission, nrows=27_500_000, merge=True)
+data = merge(data, calendar, sell_prices)
+data = reduce_mem_usage(data)
 
 
 # %% [code]
@@ -288,9 +289,6 @@ def add_time_features(df):
 
 
 # %% [code]
-data = melt_and_merge(
-    calendar, sell_prices, sales_train_val, submission, nrows=27_500_000, merge=True
-)
 data = encode_categoricals(data)
 data = add_agg_features(data)
 data = add_time_features(data)
