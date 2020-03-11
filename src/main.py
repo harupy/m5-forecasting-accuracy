@@ -370,16 +370,12 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask1 = data["date"] <= "2016-03-27"  # noqa
-mask2 = data["date"] <= "2016-04-24"  # noqa
-X_train = data[mask2][features]
-y_train = data[mask2]["demand"]
+mask = data["date"] <= "2016-04-24"
+X_train = data[mask][features]
+y_train = data[mask]["demand"]
 
-# X_val = data[~mask1 & mask2][features]
-# y_val = data[~mask1 & mask2]["demand"]
-
-X_test = data[~mask2][features]
-id_date = data[~mask2][["id", "date"]]  # keep these two columns to use later.
+X_test = data[~mask][features]
+id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
 
 del data
 gc.collect()
