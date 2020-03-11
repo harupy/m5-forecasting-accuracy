@@ -1,6 +1,6 @@
 # %% [markdown]
 # This kernel is:
-# - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar123!
+# - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar123.
 # - Automatically uploaded by [push-kaggle-kernel](https://github.com/harupy/push-kaggle-kernel).
 # - Formatted by [Black](https://github.com/psf/black).
 
