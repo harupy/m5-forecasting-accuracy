@@ -362,6 +362,7 @@ features = [
     "week",
     "day",
     "dayofweek",
+    "is_weekend",
 ]
 
 # prepare training and test data.
