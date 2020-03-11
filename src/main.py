@@ -451,6 +451,7 @@ def make_submission(test, submission):
     final = pd.concat([vals, evals])
 
     assert final[F_cols].isnull().sum().sum() == 0
+    assert final["id"].equals(submission["id"])
 
     final.to_csv("submission.csv", index=False)
 
