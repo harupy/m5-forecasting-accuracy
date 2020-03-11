@@ -380,6 +380,9 @@ id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
 del data
 gc.collect()
 
+print("Train shape:", X_train.shape)
+print("Test shape:", X_test.shape)
+
 # %% [code]
 bst_params = {
     "boosting_type": "gbdt",
