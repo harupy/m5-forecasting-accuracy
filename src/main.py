@@ -180,7 +180,7 @@ def melt(
     return data
 
 
-def merge(data, calendar, sell_prices, verbose=True):
+def merge_calendar(data, calendar, verbose=True):
     # drop some calendar features.
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
 
@@ -191,6 +191,10 @@ def merge(data, calendar, sell_prices, verbose=True):
     if verbose:
         display(data)
 
+    return data
+
+
+def merge_sell_prices(data, sell_prices, verbose=True):
     # get the sell price data (this feature should be very important).
     data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
 
@@ -202,7 +206,8 @@ def merge(data, calendar, sell_prices, verbose=True):
 
 # %% [code]
 data = melt(sales_train_val, submission, nrows=27_500_000)
-data = merge(data, calendar, sell_prices)
+data = merge_calendar(data, calendar)
+data = merge_sell_prices(data, sell_prices)
 data = reduce_mem_usage(data)
 
 
