@@ -1,6 +1,6 @@
 # %% [markdown]
 # This kernel is:
-# - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar123!
+# - Based on [Very fst Model](https://www.kaggle.com/ragnar123/very-fst-model). Thanks @ragnar123.
 # - Automatically uploaded by [push-kaggle-kernel](https://github.com/harupy/push-kaggle-kernel).
 # - Formatted by [Black](https://github.com/psf/black).
 
@@ -130,8 +130,8 @@ def melt(
         display(sales_train_val)
 
     # separate test dataframes.
-    test1 = submission[submission["id"].str.contains("validation")]
-    test2 = submission[submission["id"].str.contains("evaluation")]
+    test1 = submission[submission["id"].str.endswith("validation")]
+    test2 = submission[submission["id"].str.endswith("evaluation")]
 
     if verbose:
         display(test1, test2)
@@ -180,7 +180,7 @@ def melt(
     return data
 
 
-def merge(data, calendar, sell_prices, verbose=True):
+def merge_calendar(data, calendar, verbose=True):
     # drop some calendar features.
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
 
@@ -191,6 +191,10 @@ def merge(data, calendar, sell_prices, verbose=True):
     if verbose:
         display(data)
 
+    return data
+
+
+def merge_sell_prices(data, sell_prices, verbose=True):
     # get the sell price data (this feature should be very important).
     data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
 
@@ -202,7 +206,8 @@ def merge(data, calendar, sell_prices, verbose=True):
 
 # %% [code]
 data = melt(sales_train_val, submission, nrows=27_500_000)
-data = merge(data, calendar, sell_prices)
+data = merge_calendar(data, calendar)
+data = merge_sell_prices(data, sell_prices)
 data = reduce_mem_usage(data)
 
 
@@ -357,6 +362,7 @@ features = [
     "week",
     "day",
     "dayofweek",
+    "is_weekend",
 ]
 
 # prepare training and test data.
@@ -364,19 +370,18 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask1 = data["date"] <= "2016-03-27"  # noqa
-mask2 = data["date"] <= "2016-04-24"  # noqa
-X_train = data[mask2][features]
-y_train = data[mask2]["demand"]
+mask = data["date"] <= "2016-04-24"
+X_train = data[mask][features]
+y_train = data[mask]["demand"]
 
-# X_val = data[~mask1 & mask2][features]
-# y_val = data[~mask1 & mask2]["demand"]
-
-X_test = data[~mask2][features]
-id_date = data[~mask2][["id", "date"]]  # keep these two columns to use later.
+X_test = data[~mask][features]
+id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
 
 del data
 gc.collect()
+
+print("Train shape:", X_train.shape)
+print("Test shape:", X_test.shape)
 
 # %% [code]
 bst_params = {
@@ -446,11 +451,12 @@ def make_submission(test, submission):
     F_cols = ["F" + str(x + 1) for x in range(28)]
     preds.columns = ["id"] + F_cols
 
-    evals = submission[submission["id"].str.contains("evaluation")]
+    evals = submission[submission["id"].str.endswith("evaluation")]
     vals = submission[["id"]].merge(preds, how="inner", on="id")
     final = pd.concat([vals, evals])
 
     assert final[F_cols].isnull().sum().sum() == 0
+    assert final["id"].equals(submission["id"])
 
     final.to_csv("submission.csv", index=False)
 
