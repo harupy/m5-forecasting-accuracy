@@ -130,8 +130,8 @@ def melt(
         display(sales_train_val)
 
     # separate test dataframes.
-    test1 = submission[submission["id"].str.contains("validation")]
-    test2 = submission[submission["id"].str.contains("evaluation")]
+    test1 = submission[submission["id"].str.endswith("validation")]
+    test2 = submission[submission["id"].str.endswith("evaluation")]
 
     if verbose:
         display(test1, test2)
@@ -446,7 +446,7 @@ def make_submission(test, submission):
     F_cols = ["F" + str(x + 1) for x in range(28)]
     preds.columns = ["id"] + F_cols
 
-    evals = submission[submission["id"].str.contains("evaluation")]
+    evals = submission[submission["id"].str.endswith("evaluation")]
     vals = submission[["id"]].merge(preds, how="inner", on="id")
     final = pd.concat([vals, evals])
 
