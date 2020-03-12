@@ -316,7 +316,7 @@ def plot_cv_indices(cv, X, y, dt_col, ax, lw=10):
 
         # Visualize the results
         ax.scatter(
-            X["dt"],
+            X[dt_col],
             [ii + 0.5] * len(indices),
             c=indices,
             marker="_",
@@ -332,9 +332,9 @@ def plot_cv_indices(cv, X, y, dt_col, ax, lw=10):
     ax.set(
         yticks=np.arange(n_splits) + 0.5,
         yticklabels=yticklabels,
-        xlabel="Sample index",
+        xlabel="Datetime",
         ylabel="CV iteration",
-        xlim=[X["dt"].min(), X["dt"].max()],
+        xlim=[X[dt_col].min(), X[dt_col].max()],
     )
     ax.invert_yaxis()
     ax.set_title("{}".format(type(cv).__name__), fontsize=15)
@@ -381,8 +381,8 @@ class CustomTimeSeriesSplitter:
 # %% [code]
 fig, ax = plt.subplots(figsize=(20, 6))
 dt_col = "date"
-cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col="date")
-plot_cv_indices(cv, data, None, "date", ax)
+cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col=dt_col)
+plot_cv_indices(cv, data, None, dt_col, ax)
 
 
 # %% [code]
