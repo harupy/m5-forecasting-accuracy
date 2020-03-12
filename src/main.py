@@ -307,6 +307,7 @@ data = encode_categoricals(data)
 data = add_agg_features(data)
 dt_col = "date"
 data = add_time_features(data, dt_col)
+data = data.sort_values("date")
 data = reduce_mem_usage(data)
 
 
@@ -386,12 +387,11 @@ class CustomTimeSeriesSplitter:
 # %% [code]
 fig, ax = plt.subplots(figsize=(20, 6))
 cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col=dt_col)
-plot_cv_indices(cv, data.sample(frac=0.01).reset_index(drop=True), None, dt_col, ax)
+plot_cv_indices(cv, data, None, dt_col, ax)
 
 
 # %% [code]
 features = [
-    "date",  # Keep this column for cross validation.
     "item_id",
     "dept_id",
     "cat_id",
@@ -436,7 +436,7 @@ features = [
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
 mask = data["date"] <= "2016-04-24"
-X_train = data[mask][features].reset_index(drop=True)
+X_train = data[mask][["date"] + features].reset_index(drop=True)
 y_train = data[mask]["demand"].reset_index(drop=True)
 X_test = data[~mask][features].reset_index(drop=True)
 
