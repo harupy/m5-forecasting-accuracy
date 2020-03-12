@@ -446,8 +446,6 @@ id_date = data[~mask][["id", "date"]].reset_index(drop=True)
 del data
 gc.collect()
 
-assert X_train.columns.tolist() == X_test.columns.tolist()
-
 print("Train shape:", X_train.shape)
 print("Test shape:", X_test.shape)
 
