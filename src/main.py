@@ -99,9 +99,13 @@ def read_data():
 
     calendar = pd.read_csv(f"{INPUT_DIR}/calendar.csv").pipe(reduce_mem_usage)
     sell_prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
-    sales_train_val = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv").pipe(
-        reduce_mem_usage
-    )
+
+    # Limit the number of columns to use to prevent OOM error.
+    id_cols = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
+    usecols = id_cols + [f"d_{x}".format(x) for x in range(1000, 1913 + 1)]
+    sales_train_val = pd.read_csv(
+        f"{INPUT_DIR}/sales_train_validation.csv", usecols=usecols
+    ).pipe(reduce_mem_usage)
     submission = pd.read_csv(f"{INPUT_DIR}/sample_submission.csv").pipe(
         reduce_mem_usage
     )
