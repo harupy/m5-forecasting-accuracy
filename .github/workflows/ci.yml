@@ -23,10 +23,3 @@ jobs:
 
       - name: Formatting
         run: black --check .
-
-      - name: Verify notebook is updated.
-        run: |
-          ./tools/convert.sh
-          if [ ! -z "$(git diff)" ]; then
-              exit 1
-          fi
