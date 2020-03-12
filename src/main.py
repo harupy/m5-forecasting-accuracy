@@ -102,7 +102,7 @@ def read_data():
 
     # Limit the number of columns to use to prevent OOM error.
     id_cols = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
-    usecols = id_cols + [f"d_{x}".format(x) for x in range(1000, 1913 + 1)]
+    usecols = id_cols + [f"d_{x}".format(x) for x in range(500, 1913 + 1)]
     sales_train_val = pd.read_csv(
         f"{INPUT_DIR}/sales_train_validation.csv", usecols=usecols
     ).pipe(reduce_mem_usage)
