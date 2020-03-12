@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Convert script to notebook
+        run: ./convert.sh
+
       - uses: ./.github/actions/upload
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}

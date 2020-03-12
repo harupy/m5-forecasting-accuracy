@@ -7,6 +7,9 @@ mlruns/
 # vscode
 .vscode/
 
+# Notebook
+src/main.ipynb
+
 # kaggle data
 input/
 submission.csv
