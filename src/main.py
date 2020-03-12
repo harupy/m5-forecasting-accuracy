@@ -16,7 +16,9 @@ import os
 import warnings
 
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
 import numpy as np
+import matplotlib.pyplot as plt
 import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
@@ -25,6 +27,8 @@ from sklearn.model_selection import TimeSeriesSplit
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.max_rows", 500)
+register_matplotlib_converters()
+
 
 # %% [code]
 import IPython
@@ -302,6 +306,86 @@ data = reduce_mem_usage(data)
 
 
 # %% [code]
+def plot_cv_indices(cv, X, y, dt_col, ax, lw=10):
+    # Generate the training/testing visualizations for each CV split
+    for ii, (tr, tt) in enumerate(cv.split(X=X, y=y)):
+        # Fill in indices with the training/test groups
+        indices = np.array([np.nan] * len(X))
+        indices[tt] = 1
+        indices[tr] = 0
+
+        # Visualize the results
+        ax.scatter(
+            X["dt"],
+            [ii + 0.5] * len(indices),
+            c=indices,
+            marker="_",
+            lw=lw,
+            cmap=plt.cm.coolwarm,
+            vmin=-0.2,
+            vmax=1.2,
+        )
+
+    # Formatting
+    n_splits = cv.get_n_splits()
+    yticklabels = list(range(n_splits))
+    ax.set(
+        yticks=np.arange(n_splits) + 0.5,
+        yticklabels=yticklabels,
+        xlabel="Sample index",
+        ylabel="CV iteration",
+        xlim=[X["dt"].min(), X["dt"].max()],
+    )
+    ax.invert_yaxis()
+    ax.set_title("{}".format(type(cv).__name__), fontsize=15)
+    return ax
+
+
+# %% [code]
+class CustomTimeSeriesSplitter:
+    def __init__(self, n_splits=5, train_days=80, test_days=20, dt_col="date"):
+        self.n_splits = n_splits
+        self.train_days = train_days
+        self.test_days = test_days
+        self.dt_col = dt_col
+
+    def split(self, X, y=None, groups=None):
+        sec = (X[self.dt_col] - X[self.dt_col][0]).dt.total_seconds()
+        duration = sec.max() - sec.min()
+
+        train_sec = 3600 * 24 * self.train_days
+        test_sec = 3600 * 24 * self.test_days
+        total_sec = test_sec + train_sec
+        step = (duration - total_sec) / (self.n_splits - 1)
+
+        train_start = 0
+        for idx in range(self.n_splits):
+            train_start = idx * step
+            train_end = train_start + train_sec
+            test_end = train_end + test_sec
+
+            if idx == self.n_splits - 1:
+                test_mask = sec >= train_end
+            else:
+                test_mask = (sec >= train_end) & (sec < test_end)
+
+            train_mask = (sec >= train_start) & (sec < train_end)
+            test_mask = (sec >= train_end) & (sec < test_end)
+
+            yield sec[train_mask].index.values, sec[test_mask].index.values
+
+    def get_n_splits(self):
+        return self.n_splits
+
+
+# %% [code]
+fig, ax = plt.subplots(figsize=(20, 6))
+dt_col = "date"
+cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col="date")
+plot_cv_indices(cv, data, None, "date", ax)
+
+
+# %% [code]
 def train_lgb(bst_params, fit_params, X, y, cv):
     models = []
 
@@ -380,6 +464,8 @@ id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
 del data
 gc.collect()
 
+assert X_train.columns.tolist() == X_test.columns.tolist()
+
 print("Train shape:", X_train.shape)
 print("Test shape:", X_test.shape)
 
@@ -402,8 +488,11 @@ fit_params = {
     "verbose_eval": 100,
 }
 
-cv = TimeSeriesSplit(n_splits=5)
+# cv = TimeSeriesSplit(n_splits=5)
 models = train_lgb(bst_params, fit_params, X_train, y_train, cv)
+
+del X_train, y_train
+gc.collect()
 
 
 # %% [code]
@@ -413,7 +502,7 @@ def rmse(y_true, y_pred):
 
 # %% [code]
 imp_type = "gain"
-importances = np.zeros(X_train.shape[1])
+importances = np.zeros(X_test.shape[1])
 preds = np.zeros(X_test.shape[0])
 
 for model in models:
