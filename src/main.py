@@ -209,7 +209,7 @@ def merge_sell_prices(data, sell_prices, verbose=True):
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=27_500_000)
+data = melt(sales_train_val, submission, nrows=10_100_000)
 data = merge_calendar(data, calendar)
 data = merge_sell_prices(data, sell_prices)
 data = reduce_mem_usage(data)
@@ -287,8 +287,8 @@ def add_agg_features(df):
     return df.drop(["rolling_price_max_t365", "shift_price_t1"], axis=1)
 
 
-def add_time_features(df):
-    df["date"] = pd.to_datetime(df["date"])
+def add_time_features(df, dt_col):
+    df[dt_col] = pd.to_datetime(df[dt_col])
     df["year"] = df["date"].dt.year
     df["month"] = df["date"].dt.month
     df["week"] = df["date"].dt.week
@@ -301,7 +301,8 @@ def add_time_features(df):
 # %% [code]
 data = encode_categoricals(data)
 data = add_agg_features(data)
-data = add_time_features(data)
+dt_col = "date"
+data = add_time_features(data, dt_col)
 data = reduce_mem_usage(data)
 
 
@@ -380,37 +381,13 @@ class CustomTimeSeriesSplitter:
 
 # %% [code]
 fig, ax = plt.subplots(figsize=(20, 6))
-dt_col = "date"
 cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col=dt_col)
-plot_cv_indices(cv, data, None, dt_col, ax)
-
-
-# %% [code]
-def train_lgb(bst_params, fit_params, X, y, cv):
-    models = []
-
-    for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X, y)):
-        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
-
-        X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
-        y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
-        train_set = lgb.Dataset(X_trn, label=y_trn)
-        val_set = lgb.Dataset(X_val, label=y_val)
-
-        model = lgb.train(
-            bst_params,
-            train_set,
-            valid_sets=[train_set, val_set],
-            valid_names=["train", "valid"],
-            **fit_params,
-        )
-        models.append(model)
-
-    return models
+plot_cv_indices(cv, data.sample(frac=0.01).reset_index(drop=True), None, dt_col, ax)
 
 
 # %% [code]
 features = [
+    "date",  # Keep this column for cross validation.
     "item_id",
     "dept_id",
     "cat_id",
@@ -455,11 +432,12 @@ features = [
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
 mask = data["date"] <= "2016-04-24"
-X_train = data[mask][features]
-y_train = data[mask]["demand"]
+X_train = data[mask][features].reset_index(drop=True)
+y_train = data[mask]["demand"].reset_index(drop=True)
+X_test = data[~mask][features].reset_index(drop=True)
 
-X_test = data[~mask][features]
-id_date = data[~mask][["id", "date"]]  # keep these two columns to use later.
+# keep these two columns to use later.
+id_date = data[~mask][["id", "date"]].reset_index(drop=True)
 
 del data
 gc.collect()
@@ -468,6 +446,34 @@ assert X_train.columns.tolist() == X_test.columns.tolist()
 
 print("Train shape:", X_train.shape)
 print("Test shape:", X_test.shape)
+
+
+# %% [code]
+def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
+    models = []
+
+    if drop_when_train is None:
+        drop_when_train = []
+
+    for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X, y)):
+        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
+
+        X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
+        y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
+        train_set = lgb.Dataset(X_trn.drop(drop_when_train, axis=1), label=y_trn)
+        val_set = lgb.Dataset(X_val.drop(drop_when_train, axis=1), label=y_val)
+
+        model = lgb.train(
+            bst_params,
+            train_set,
+            valid_sets=[train_set, val_set],
+            valid_names=["train", "valid"],
+            **fit_params,
+        )
+        models.append(model)
+
+    return models
+
 
 # %% [code]
 bst_params = {
@@ -489,7 +495,9 @@ fit_params = {
 }
 
 # cv = TimeSeriesSplit(n_splits=5)
-models = train_lgb(bst_params, fit_params, X_train, y_train, cv)
+models = train_lgb(
+    bst_params, fit_params, X_train, y_train, cv, drop_when_train=[dt_col]
+)
 
 del X_train, y_train
 gc.collect()
