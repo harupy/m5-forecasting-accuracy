@@ -306,7 +306,7 @@ def add_time_features(df, dt_col):
     df[dt_col] = pd.to_datetime(df[dt_col])
     attrs = ["year", "month", "week", "day", "dayofweek"]
     for attr in attrs:
-        df[attr] = getattr(df[dt_col], attr)
+        df[attr] = getattr(df[dt_col].dt, attr)
 
     df["is_weekend"] = df["dayofweek"].isin([5, 6])
     return df
