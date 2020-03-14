@@ -227,7 +227,7 @@ def merge_sell_prices(data, sell_prices):
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=10_000_000)
+data = melt(sales_train_val, submission, nrows=5_000_000)
 del sales_train_val
 gc.collect()
 
