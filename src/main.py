@@ -166,9 +166,6 @@ def melt(
     test1 = submission[submission["id"].str.endswith("validation")]
     test2 = submission[submission["id"].str.endswith("evaluation")]
 
-    if verbose:
-        display(test1, test2)
-
     # change column names.
     test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + 28)]
     test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + 28)]
@@ -188,17 +185,11 @@ def melt(
     test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
     test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand")
 
-    if verbose:
-        display(test1, test2)
-
     sales_train_val["part"] = "train"
     test1["part"] = "test1"
     test2["part"] = "test2"
 
     data = pd.concat([sales_train_val, test1, test2], axis=0)
-
-    if verbose:
-        display(data)
 
     del sales_train_val, test1, test2
 
@@ -209,6 +200,10 @@ def melt(
     data = data[data["part"] != "test2"]
 
     gc.collect()
+
+    if verbose:
+        print("data")
+        display(data)
 
     return data
 
@@ -222,6 +217,7 @@ def merge_calendar(data, calendar, verbose=True):
     data = data.drop(["d", "day"], axis=1)
 
     if verbose:
+        print("With calendar merged")
         display(data)
 
     return data
@@ -232,6 +228,7 @@ def merge_sell_prices(data, sell_prices, verbose=True):
     data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
 
     if verbose:
+        print("With sell_prices merged")
         display(data)
 
     return data
