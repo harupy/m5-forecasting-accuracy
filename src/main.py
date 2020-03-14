@@ -313,7 +313,10 @@ print("data shape:", data.shape)
 
 
 # %% [code]
-def plot_cv_indices(cv, X, y, dt_col, ax, lw=10):
+def plot_cv_indices(cv, X, y, dt_col, lw=10):
+    n_splits = cv.get_n_splits()
+    _, ax = plt.subplots(figsize=(20, n_splits))
+
     # Generate the training/testing visualizations for each CV split
     for ii, (tr, tt) in enumerate(cv.split(X=X, y=y)):
         # Fill in indices with the training/test groups
@@ -334,7 +337,6 @@ def plot_cv_indices(cv, X, y, dt_col, ax, lw=10):
         )
 
     # Formatting
-    n_splits = cv.get_n_splits()
     yticklabels = list(range(n_splits))
     ax.set(
         yticks=np.arange(n_splits) + 0.5,
@@ -386,7 +388,6 @@ class CustomTimeSeriesSplitter:
 
 
 # %% [code]
-fig, ax = plt.subplots(figsize=(20, 6))
 cv_params = {
     "n_splits": 7,
     "train_days": 365,
@@ -395,7 +396,7 @@ cv_params = {
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
 # Plotting all the points takes long time.
-plot_cv_indices(cv, data.iloc[::1000].reset_index(drop=True), None, dt_col, ax)
+plot_cv_indices(cv, data.iloc[::1000].reset_index(drop=True), None, dt_col)
 
 
 # %% [code]
