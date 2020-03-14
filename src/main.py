@@ -387,7 +387,13 @@ class CustomTimeSeriesSplitter:
 
 # %% [code]
 fig, ax = plt.subplots(figsize=(20, 6))
-cv = CustomTimeSeriesSplitter(5, train_days=300, test_days=28, dt_col=dt_col)
+cv_params = {
+    "n_splits": 5,
+    "train_days": 300,
+    "test_days": 28,
+    "dt_col": dt_col,
+}
+cv = CustomTimeSeriesSplitter(**cv_params)
 plot_cv_indices(cv, data.iloc[::100, :].reset_index(drop=True), None, dt_col, ax)
 
 
@@ -531,13 +537,7 @@ importances = importances / cv.get_n_splits()
 from mlflow_extend import mlflow, plotting as mplt
 
 with mlflow.start_run():
-    mlflow.log_params_flatten(
-        {
-            "bst": bst_params,
-            "fit": fit_params,
-            "cv": {"type": str(TimeSeriesSplit), "n_splits": cv.get_n_splits()},
-        }
-    )
+    mlflow.log_params_flatten({"bst": bst_params, "fit": fit_params, "cv": cv_params})
 
 
 features = models[0].feature_name()
