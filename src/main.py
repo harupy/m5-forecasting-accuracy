@@ -212,34 +212,22 @@ def melt(
     return data
 
 
-def merge_calendar(data, calendar, verbose=True):
+def merge_calendar(data, calendar):
     # drop some calendar features.
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
 
     # notebook crashes with the entire dataset.
     data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
-    data = data.drop(["d", "day"], axis=1)
-
-    if verbose:
-        print("with calendar merged")
-        display(data)
-
-    return data
+    return data.drop(["d", "day"], axis=1)
 
 
-def merge_sell_prices(data, sell_prices, verbose=True):
+def merge_sell_prices(data, sell_prices):
     # get the sell price data (this feature should be very important).
-    data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
-
-    if verbose:
-        print("with sell_prices merged")
-        display(data)
-
-    return data
+    return data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=10_000_000)
+data = melt(sales_train_val, submission, nrows=27_500_000)
 del sales_train_val
 gc.collect()
 
@@ -255,7 +243,7 @@ data = reduce_mem_usage(data)
 
 
 # %% [code]
-def add_agg_features(df):
+def add_demand_features(df):
     # rolling demand features.
     for shift in [28, 29, 30]:
         df[f"shift_t{shift}"] = df.groupby(["id"])["demand"].transform(
@@ -278,7 +266,10 @@ def add_agg_features(df):
     df["rolling_kurt_t30"] = df.groupby(["id"])["demand"].transform(
         lambda x: x.shift(28).rolling(30).kurt()
     )
+    return df
 
+
+def add_price_features(df):
     # price features
     df["shift_price_t1"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1)
@@ -313,11 +304,11 @@ def add_time_features(df, dt_col):
 
 
 # %% [code]
-data = add_agg_features(data)
+data = add_demand_features(data).pipe(reduce_mem_usage)
+data = add_price_features(data).pipe(reduce_mem_usage)
 dt_col = "date"
-data = add_time_features(data, dt_col)
+data = add_time_features(data, dt_col).pipe(reduce_mem_usage)
 data = data.sort_values("date")
-data = reduce_mem_usage(data)
 print("data shape:", data.shape)
 
 
@@ -403,6 +394,7 @@ cv_params = {
     "dt_col": dt_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
+# Plotting all the points takes long time. To avoid that,
 plot_cv_indices(cv, data.iloc[::100, :].reset_index(drop=True), None, dt_col, ax)
 
 
@@ -421,7 +413,7 @@ features = [
     "snap_TX",
     "snap_WI",
     "sell_price",
-    # aggregation features.
+    # demand features.
     "shift_t28",
     "shift_t29",
     "shift_t30",
@@ -431,12 +423,13 @@ features = [
     "rolling_mean_t90",
     "rolling_mean_t180",
     "rolling_std_t30",
+    "rolling_skew_t30",
+    "rolling_kurt_t30",
+    # price features
     "price_change_t1",
     "price_change_t365",
     "rolling_price_std_t7",
     "rolling_price_std_t30",
-    "rolling_skew_t30",
-    "rolling_kurt_t30",
     # time features.
     "year",
     "month",
