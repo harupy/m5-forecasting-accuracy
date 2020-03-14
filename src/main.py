@@ -388,8 +388,8 @@ class CustomTimeSeriesSplitter:
 # %% [code]
 fig, ax = plt.subplots(figsize=(20, 6))
 cv_params = {
-    "n_splits": 5,
-    "train_days": 300,
+    "n_splits": 7,
+    "train_days": 365,
     "test_days": 28,
     "dt_col": dt_col,
 }
