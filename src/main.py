@@ -338,12 +338,11 @@ def plot_cv_indices(cv, X, y, dt_col, lw=10):
 
     # Formatting
     fontsize = 15
-    yticklabels = list(range(n_splits))
     ax.set_xlabel("Datetime", fontsize=fontsize)
     ax.set_xlim([X[dt_col].min(), X[dt_col].max()])
     ax.set_ylabel("CV iteration", fontsize=fontsize)
     ax.set_yticks(np.arange(n_splits) + 0.5)
-    ax.set_yticklabels(yticklabels)
+    ax.set_yticklabels(list(range(n_splits)))
     ax.invert_yaxis()
     ax.tick_params(axis="both", which="major", labelsize=fontsize)
     ax.set_title("{}".format(type(cv).__name__), fontsize=20)
