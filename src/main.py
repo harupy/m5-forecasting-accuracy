@@ -101,11 +101,9 @@ def read_data():
     sell_prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
 
     # Limit the number of columns to use to prevent OOM error.
-    id_cols = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
-    usecols = id_cols + [f"d_{x}".format(x) for x in range(750, 1913 + 1)]
-    sales_train_val = pd.read_csv(
-        f"{INPUT_DIR}/sales_train_validation.csv", usecols=usecols
-    ).pipe(reduce_mem_usage)
+    sales_train_val = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv",).pipe(
+        reduce_mem_usage
+    )
     submission = pd.read_csv(f"{INPUT_DIR}/sample_submission.csv").pipe(
         reduce_mem_usage
     )
@@ -120,6 +118,32 @@ def read_data():
 
 # %% [code]
 calendar, sell_prices, sales_train_val, submission = read_data()
+
+# %% [markdown]
+# As [@kaushal2896](https://www.kaggle.com/kaushal2896) suggested in [this comment](https://www.kaggle.com/harupy/m5-baseline#770558), encode the categorical columns before merging to prevent the notebook from crashing even with the full dataset.
+
+
+# %% [code]
+def encode_categorical(df, cols, fillna=False):
+    for col in cols:
+        encoder = LabelEncoder()
+        df[col] = encoder.fit_transform(
+            df[col].fillna("MISSING") if fillna else df[col]
+        )
+    return df
+
+
+calendar = encode_categorical(
+    calendar,
+    ["event_name_1", "event_type_1", "event_name_2", "event_type_2"],
+    fillna=True,
+)
+
+sales_train_val = encode_categorical(
+    calendar, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
+)
+
+sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"])
 
 
 # %% [code]
@@ -220,30 +244,6 @@ data = reduce_mem_usage(data)
 
 
 # %% [code]
-def encode_categoricals(df):
-    nan_features = ["event_name_1", "event_type_1", "event_name_2", "event_type_2"]
-    for feature in nan_features:
-        df[feature] = df[feature].fillna("MISSING")
-
-    cat_cols = [
-        "item_id",
-        "dept_id",
-        "cat_id",
-        "store_id",
-        "state_id",
-        "event_name_1",
-        "event_type_1",
-        "event_name_2",
-        "event_type_2",
-    ]
-
-    for col in cat_cols:
-        encoder = LabelEncoder()
-        df[col] = encoder.fit_transform(df[col])
-
-    return df
-
-
 def add_agg_features(df):
     # rolling demand features.
     for shift in [28, 29, 30]:
@@ -303,7 +303,6 @@ def add_time_features(df, dt_col):
 
 
 # %% [code]
-data = encode_categoricals(data)
 data = add_agg_features(data)
 dt_col = "date"
 data = add_time_features(data, dt_col)
