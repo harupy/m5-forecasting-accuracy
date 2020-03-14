@@ -293,11 +293,10 @@ def add_agg_features(df):
 
 def add_time_features(df, dt_col):
     df[dt_col] = pd.to_datetime(df[dt_col])
-    df["year"] = df["date"].dt.year
-    df["month"] = df["date"].dt.month
-    df["week"] = df["date"].dt.week
-    df["day"] = df["date"].dt.day
-    df["dayofweek"] = df["date"].dt.dayofweek
+    attrs = ["year", "month", "week", "day", "dayofweek"]
+    for attr in attrs:
+        df[attr] = getattr(df[dt_col], attr)
+
     df["is_weekend"] = df["dayofweek"].isin([5, 6])
     return df
 
