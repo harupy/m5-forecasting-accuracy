@@ -19,6 +19,7 @@ import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
@@ -28,6 +29,7 @@ warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.max_rows", 500)
 register_matplotlib_converters()
+sns.set()
 
 
 # %% [code]
