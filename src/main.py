@@ -318,6 +318,7 @@ dt_col = "date"
 data = add_time_features(data, dt_col)
 data = data.sort_values("date")
 data = reduce_mem_usage(data)
+print("data shape:", data.shape)
 
 
 # %% [code]
