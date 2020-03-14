@@ -23,7 +23,6 @@ import seaborn as sns
 import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import TimeSeriesSplit
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
