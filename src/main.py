@@ -227,7 +227,7 @@ def merge_sell_prices(data, sell_prices):
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=5_000_000)
+data = melt(sales_train_val, submission, nrows=27_500_000)
 del sales_train_val
 gc.collect()
 
@@ -389,13 +389,13 @@ class CustomTimeSeriesSplitter:
 fig, ax = plt.subplots(figsize=(20, 6))
 cv_params = {
     "n_splits": 7,
-    "train_days": 540,
+    "train_days": 365,
     "test_days": 28,
     "dt_col": dt_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
-# Plotting all the points takes long time. To avoid that,
-plot_cv_indices(cv, data.iloc[::100, :].reset_index(drop=True), None, dt_col, ax)
+# Plotting all the points takes long time.
+plot_cv_indices(cv, data.iloc[::100].reset_index(drop=True), None, dt_col, ax)
 
 
 # %% [code]
@@ -505,7 +505,6 @@ fit_params = {
     "verbose_eval": 100,
 }
 
-# cv = TimeSeriesSplit(n_splits=5)
 models = train_lgb(
     bst_params, fit_params, X_train, y_train, cv, drop_when_train=[dt_col]
 )
@@ -528,7 +527,6 @@ for model in models:
     preds += model.predict(X_test)
     importances += model.feature_importance(imp_type)
 
-# Take the average over folds.
 preds = preds / cv.get_n_splits()
 importances = importances / cv.get_n_splits()
 
