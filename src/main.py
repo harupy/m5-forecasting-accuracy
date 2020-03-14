@@ -227,7 +227,7 @@ def merge_sell_prices(data, sell_prices):
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=27_500_000)
+data = melt(sales_train_val, submission, nrows=10_000_000)
 del sales_train_val
 gc.collect()
 
@@ -389,7 +389,7 @@ class CustomTimeSeriesSplitter:
 fig, ax = plt.subplots(figsize=(20, 6))
 cv_params = {
     "n_splits": 7,
-    "train_days": 365,
+    "train_days": 540,
     "test_days": 28,
     "dt_col": dt_col,
 }
