@@ -138,13 +138,15 @@ calendar = encode_categorical(
     calendar,
     ["event_name_1", "event_type_1", "event_name_2", "event_type_2"],
     fillna=True,
-)
+).pipe(reduce_mem_usage)
 
 sales_train_val = encode_categorical(
     sales_train_val, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
-)
+).pipe(reduce_mem_usage)
 
-sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"])
+sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"]).pipe(
+    reduce_mem_usage
+)
 
 
 # %% [code]
@@ -238,8 +240,17 @@ def merge_sell_prices(data, sell_prices, verbose=True):
 
 # %% [code]
 data = melt(sales_train_val, submission, nrows=10_100_000)
+del sales_train_val
+gc.collect()
+
 data = merge_calendar(data, calendar)
+del calendar
+gc.collect()
+
 data = merge_sell_prices(data, sell_prices)
+del sell_prices
+gc.collect()
+
 data = reduce_mem_usage(data)
 
 
