@@ -160,6 +160,7 @@ def melt(
     sales_train_val = reduce_mem_usage(sales_train_val)
 
     if verbose:
+        print("After melt")
         display(sales_train_val)
 
     # separate test dataframes.
@@ -180,6 +181,7 @@ def melt(
     test2["id"] = test2["id"].str.replace("_validation", "_evaluation")
 
     if verbose:
+        print("test1 & 2")
         display(test1, test2)
 
     test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
@@ -217,7 +219,7 @@ def merge_calendar(data, calendar, verbose=True):
     data = data.drop(["d", "day"], axis=1)
 
     if verbose:
-        print("With calendar merged")
+        print("with calendar merged")
         display(data)
 
     return data
@@ -228,7 +230,7 @@ def merge_sell_prices(data, sell_prices, verbose=True):
     data = data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
 
     if verbose:
-        print("With sell_prices merged")
+        print("with sell_prices merged")
         display(data)
 
     return data
