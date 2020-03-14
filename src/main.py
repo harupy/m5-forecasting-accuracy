@@ -141,7 +141,7 @@ calendar = encode_categorical(
 )
 
 sales_train_val = encode_categorical(
-    calendar, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
+    sales_train_val, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
 )
 
 sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"])
