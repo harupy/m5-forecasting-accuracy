@@ -125,8 +125,8 @@ def read_data():
 # %% [code]
 calendar, sell_prices, sales_train_val, submission = read_data()
 
-NUM_ITEMS = sales_train_val.shape[0]
-DAYS_PRED = submission.shape[1] - 1
+NUM_ITEMS = sales_train_val.shape[0]  # 30490
+DAYS_PRED = submission.shape[1] - 1  # 28
 # %% [markdown]
 # As [@kaushal2896](https://www.kaggle.com/kaushal2896) suggested in [this comment](https://www.kaggle.com/harupy/m5-baseline#770558), encode the categorical columns before merging to prevent the notebook from crashing even with the full dataset.
 
