@@ -109,10 +109,15 @@ def read_data():
         reduce_mem_usage
     )
 
-    print("Calendar shape:", calendar.shape)
-    print("Sell prices shape:", sell_prices.shape)
-    print("Sales train shape:", sales_train_val.shape)
-    print("Submission shape:", submission.shape)
+    print("calendar shape :", calendar.shape)
+    print("sell_prices shape :", sell_prices.shape)
+    print("sales_train_val shape :", sales_train_val.shape)
+    print("submission shape :", submission.shape)
+
+    # calendar shape : (1969, 14)
+    # sell_prices shape : (6841121, 4)
+    # sales_train_val shape : (30490, 1919)
+    # submission shape : (60980, 29)
 
     return calendar, sell_prices, sales_train_val, submission
 
