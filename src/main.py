@@ -164,7 +164,7 @@ def melt(
         sales_train_val, id_vars=id_columns, var_name="day", value_name="demand",
     )
 
-    sales_train_val = reduce_mem_usage(sales_train_val)
+    sales_train_val = reduce_mem_usage(sales_train_val, verbose=False)
 
     if verbose:
         print("After melt")
