@@ -178,42 +178,42 @@ def melt(
         display(sales_train_val)
 
     # separate test dataframes.
-    test1 = submission[submission["id"].str.endswith("validation")]
-    test2 = submission[submission["id"].str.endswith("evaluation")]
+    vals = submission[submission["id"].str.endswith("validation")]
+    evals = submission[submission["id"].str.endswith("evaluation")]
 
     # change column names.
-    test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + DAYS_PRED)]
-    test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + DAYS_PRED)]
+    vals.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + DAYS_PRED)]
+    evals.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + DAYS_PRED)]
 
     # merge with product table
-    test2["id"] = test2["id"].str.replace("_evaluation", "_validation")
-    test1 = test1.merge(product, how="left", on="id")
-    test2 = test2.merge(product, how="left", on="id")
-    test2["id"] = test2["id"].str.replace("_validation", "_evaluation")
+    evals["id"] = evals["id"].str.replace("_evaluation", "_validation")
+    vals = vals.merge(product, how="left", on="id")
+    evals = evals.merge(product, how="left", on="id")
+    evals["id"] = evals["id"].str.replace("_validation", "_evaluation")
 
     if verbose:
-        print("test1")
-        display(test1)
+        print("validation")
+        display(vals)
 
-        print("test2")
-        display(test2)
+        print("evaluation")
+        display(evals)
 
-    test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
-    test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand")
+    vals = pd.melt(vals, id_vars=id_columns, var_name="day", value_name="demand")
+    evals = pd.melt(evals, id_vars=id_columns, var_name="day", value_name="demand")
 
     sales_train_val["part"] = "train"
-    test1["part"] = "test1"
-    test2["part"] = "test2"
+    vals["part"] = "validation"
+    evals["part"] = "evaluation"
 
-    data = pd.concat([sales_train_val, test1, test2], axis=0)
+    data = pd.concat([sales_train_val, vals, evals], axis=0)
 
-    del sales_train_val, test1, test2
+    del sales_train_val, vals, evals
 
     # get only a sample for fast training.
     data = data.loc[nrows:]
 
-    # delete test2 for now.
-    data = data[data["part"] != "test2"]
+    # delete evaluation for now.
+    data = data[data["part"] != "evaluation"]
 
     gc.collect()
 
