@@ -109,10 +109,15 @@ def read_data():
         reduce_mem_usage
     )
 
-    print("Calendar shape:", calendar.shape)
-    print("Sell prices shape:", sell_prices.shape)
-    print("Sales train shape:", sales_train_val.shape)
-    print("Submission shape:", submission.shape)
+    print("calendar shape :", calendar.shape)
+    print("sell_prices shape :", sell_prices.shape)
+    print("sales_train_val shape :", sales_train_val.shape)
+    print("submission shape :", submission.shape)
+
+    # calendar shape : (1969, 14)
+    # sell_prices shape : (6841121, 4)
+    # sales_train_val shape : (30490, 1919)
+    # submission shape : (60980, 29)
 
     return calendar, sell_prices, sales_train_val, submission
 
@@ -159,7 +164,7 @@ def melt(
         sales_train_val, id_vars=id_columns, var_name="day", value_name="demand",
     )
 
-    sales_train_val = reduce_mem_usage(sales_train_val)
+    sales_train_val = reduce_mem_usage(sales_train_val, verbose=False)
 
     if verbose:
         print("After melt")
@@ -183,8 +188,11 @@ def melt(
     test2["id"] = test2["id"].str.replace("_validation", "_evaluation")
 
     if verbose:
-        print("test1 & 2")
-        display(test1, test2)
+        print("test1")
+        display(test1)
+
+        print("test2")
+        display(test2)
 
     test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
     test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand")
@@ -295,11 +303,26 @@ def add_price_features(df):
 
 def add_time_features(df, dt_col):
     df[dt_col] = pd.to_datetime(df[dt_col])
-    attrs = ["year", "month", "week", "day", "dayofweek"]
-    for attr in attrs:
-        df[attr] = getattr(df[dt_col].dt, attr)
+    attrs = [
+        "year",
+        "quarter",
+        "month",
+        "week",
+        "day",
+        "dayofweek",
+        "is_year_end",
+        "is_year_start",
+        "is_quarter_end",
+        "is_quarter_start",
+        "is_month_end",
+        "is_month_start",
+    ]
 
-    df["is_weekend"] = df["dayofweek"].isin([5, 6])
+    for attr in attrs:
+        dtype = np.int16 if attr == "year" else np.int8
+        df[attr] = getattr(df[dt_col].dt, attr).astype(dtype)
+
+    df["is_weekend"] = df["dayofweek"].isin([5, 6]).astype(np.int8)
     return df
 
 
@@ -437,6 +460,12 @@ features = [
     "week",
     "day",
     "dayofweek",
+    "is_year_end",
+    "is_year_start",
+    "is_quarter_end",
+    "is_quarter_start",
+    "is_month_end",
+    "is_month_start",
     "is_weekend",
 ]
 
