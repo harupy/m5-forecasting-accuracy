@@ -454,6 +454,7 @@ features = [
     "rolling_mean_t7",
     "rolling_std_t7",
     "rolling_mean_t30",
+    "rolling_mean_t60",
     "rolling_mean_t90",
     "rolling_mean_t180",
     "rolling_std_t30",
