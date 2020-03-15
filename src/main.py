@@ -295,11 +295,26 @@ def add_price_features(df):
 
 def add_time_features(df, dt_col):
     df[dt_col] = pd.to_datetime(df[dt_col])
-    attrs = ["year", "month", "week", "day", "dayofweek"]
-    for attr in attrs:
-        df[attr] = getattr(df[dt_col].dt, attr)
+    attrs = [
+        "year",
+        "quarter",
+        "month",
+        "week",
+        "day",
+        "dayofweek",
+        "is_year_end",
+        "is_year_start",
+        "is_quarter_end",
+        "is_quarter_start",
+        "is_month_end",
+        "is_month_start",
+    ]
 
-    df["is_weekend"] = df["dayofweek"].isin([5, 6])
+    for attr in attrs:
+        dtype = np.int16 if attr == "year" else np.int8
+        df[attr] = getattr(df[dt_col].dt, attr).astype(dtype)
+
+    df["is_weekend"] = df["dayofweek"].isin([5, 6]).astype(np.int8)
     return df
 
 
@@ -437,6 +452,12 @@ features = [
     "week",
     "day",
     "dayofweek",
+    "is_year_end",
+    "is_year_start",
+    "is_quarter_end",
+    "is_quarter_start",
+    "is_month_end",
+    "is_month_start",
     "is_weekend",
 ]
 
