@@ -427,7 +427,7 @@ cv_params = {
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
 # Plotting all the points takes long time.
-plot_cv_indices(cv, data.iloc[::1000].reset_index(drop=True), None, dt_col)
+plot_cv_indices(cv, data.iloc[::1000][[dt_col]].reset_index(drop=True), None, dt_col)
 
 
 # %% [code]
