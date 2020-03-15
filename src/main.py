@@ -509,7 +509,7 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
         drop_when_train = []
 
     for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X, y)):
-        print("\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
+        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
 
         X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
         y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
