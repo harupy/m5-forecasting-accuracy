@@ -174,7 +174,7 @@ def melt(
     sales_train_val = reduce_mem_usage(sales_train_val, verbose=False)
 
     if verbose:
-        print("After melt")
+        print("melted")
         display(sales_train_val)
 
     # separate test dataframes.
