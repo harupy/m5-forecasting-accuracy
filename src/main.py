@@ -420,8 +420,8 @@ class CustomTimeSeriesSplitter:
 # %% [code]
 cv_params = {
     "n_splits": 5,
-    "train_days": 365 * 2,
-    "test_days": DAYS_PRED * 2,
+    "train_days": int(365 * 1.5),
+    "test_days": DAYS_PRED,
     "dt_col": dt_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
