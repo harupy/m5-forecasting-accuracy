@@ -532,7 +532,7 @@ preds = preds / cv.get_n_splits()
 importances = importances / cv.get_n_splits()
 
 # %% [markdown]
-# https://github.com/harupy/mlflow-extend
+# # https://github.com/harupy/mlflow-extend
 
 # %% [code]
 from mlflow_extend import mlflow, plotting as mplt
