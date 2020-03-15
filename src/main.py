@@ -160,6 +160,10 @@ def melt(
 ):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
+
+    # get product table.
+    product = sales_train_val[id_columns]
+
     sales_train_val = pd.melt(
         sales_train_val, id_vars=id_columns, var_name="day", value_name="demand",
     )
@@ -177,9 +181,6 @@ def melt(
     # change column names.
     test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + 28)]
     test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + 28)]
-
-    # get product table.
-    product = sales_train_val[id_columns].drop_duplicates()
 
     # merge with product table
     test2["id"] = test2["id"].str.replace("_evaluation", "_validation")
