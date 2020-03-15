@@ -263,12 +263,12 @@ def add_demand_features(df):
             lambda x: x.shift(shift)
         )
 
-    for size in [7, 30]:
+    for size in [7, 30, 60, 90, 180]:
         df[f"rolling_std_t{size}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(DAYS_PRED).rolling(size).std()
         )
 
-    for size in [7, 30, 90, 180]:
+    for size in [7, 30, 60, 90, 180]:
         df[f"rolling_mean_t{size}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(DAYS_PRED).rolling(size).mean()
         )
