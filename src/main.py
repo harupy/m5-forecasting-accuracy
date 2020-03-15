@@ -182,8 +182,8 @@ def melt(
     evals = submission[submission["id"].str.endswith("evaluation")]
 
     # change column names.
-    vals.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + DAYS_PRED)]
-    evals.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + DAYS_PRED)]
+    vals.columns = ["id"] + [f"d_{d}" for d in range(1914, 1914 + DAYS_PRED)]
+    evals.columns = ["id"] + [f"d_{d}" for d in range(1942, 1942 + DAYS_PRED)]
 
     # merge with product table
     evals["id"] = evals["id"].str.replace("_evaluation", "_validation")
