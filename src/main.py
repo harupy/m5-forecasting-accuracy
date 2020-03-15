@@ -399,8 +399,11 @@ class CustomTimeSeriesSplitter:
         step = (duration - total_sec) / (self.n_splits - 1)
 
         for idx in range(self.n_splits):
-            train_start = idx * step
-            train_end = train_start + train_sec
+            # train_start = idx * step
+            # train_end = train_start + train_sec
+
+            train_start = 0
+            train_end = idx * step + train_sec
             test_end = train_end + test_sec
 
             if idx == self.n_splits - 1:
