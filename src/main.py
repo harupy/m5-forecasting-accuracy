@@ -181,8 +181,8 @@ def melt(
     test2 = submission[submission["id"].str.endswith("evaluation")]
 
     # change column names.
-    test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + 28)]
-    test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + 28)]
+    test1.columns = ["id"] + [f"d_{x}".format(x) for x in range(1914, 1914 + DAYS_PRED)]
+    test2.columns = ["id"] + [f"d_{x}".format(x) for x in range(1942, 1942 + DAYS_PRED)]
 
     # merge with product table
     test2["id"] = test2["id"].str.replace("_evaluation", "_validation")
@@ -256,26 +256,27 @@ data = reduce_mem_usage(data)
 # %% [code]
 def add_demand_features(df):
     # rolling demand features.
-    for shift in [28, 29, 30]:
+    for diff in [0, 1, 2]:
+        shift = DAYS_PRED + diff
         df[f"shift_t{shift}"] = df.groupby(["id"])["demand"].transform(
             lambda x: x.shift(shift)
         )
 
     for size in [7, 30]:
         df[f"rolling_std_t{size}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(28).rolling(size).std()
+            lambda x: x.shift(DAYS_PRED).rolling(size).std()
         )
 
     for size in [7, 30, 90, 180]:
         df[f"rolling_mean_t{size}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(28).rolling(size).mean()
+            lambda x: x.shift(DAYS_PRED).rolling(size).mean()
         )
 
     df["rolling_skew_t30"] = df.groupby(["id"])["demand"].transform(
-        lambda x: x.shift(28).rolling(30).skew()
+        lambda x: x.shift(DAYS_PRED).rolling(30).skew()
     )
     df["rolling_kurt_t30"] = df.groupby(["id"])["demand"].transform(
-        lambda x: x.shift(28).rolling(30).kurt()
+        lambda x: x.shift(DAYS_PRED).rolling(30).kurt()
     )
     return df
 
@@ -420,7 +421,7 @@ class CustomTimeSeriesSplitter:
 cv_params = {
     "n_splits": 7,
     "train_days": 180,
-    "test_days": 28,
+    "test_days": DAYS_PRED,
     "dt_col": dt_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
@@ -587,7 +588,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
-    F_cols = ["F" + str(x + 1) for x in range(28)]
+    F_cols = ["F" + str(x + 1) for x in range(DAYS_PRED)]
     preds.columns = ["id"] + F_cols
 
     evals = submission[submission["id"].str.endswith("evaluation")]
