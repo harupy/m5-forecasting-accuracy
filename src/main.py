@@ -109,15 +109,15 @@ def read_data():
         reduce_mem_usage
     )
 
-    print("calendar shape :", calendar.shape)
-    print("sell_prices shape :", sell_prices.shape)
-    print("sales_train_val shape :", sales_train_val.shape)
+    print("calendar shape ", calendar.shape)
+    print("sell_prices shape:", sell_prices.shape)
+    print("sales_train_val shape:", sales_train_val.shape)
     print("submission shape :", submission.shape)
 
-    # calendar shape : (1969, 14)
-    # sell_prices shape : (6841121, 4)
-    # sales_train_val shape : (30490, 1919)
-    # submission shape : (60980, 29)
+    # calendar shape: (1969, 14)
+    # sell_prices shape: (6841121, 4)
+    # sales_train_val shape: (30490, 1919)
+    # submission shape: (60980, 29)
 
     return calendar, sell_prices, sales_train_val, submission
 
@@ -332,6 +332,9 @@ data = add_price_features(data).pipe(reduce_mem_usage)
 dt_col = "date"
 data = add_time_features(data, dt_col).pipe(reduce_mem_usage)
 data = data.sort_values("date")
+
+print("start date:", data[dt_col].min())
+print("end date:", data[dt_col].max())
 print("data shape:", data.shape)
 
 
