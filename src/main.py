@@ -188,8 +188,11 @@ def melt(
     test2["id"] = test2["id"].str.replace("_validation", "_evaluation")
 
     if verbose:
-        print("test1 & 2")
-        display(test1, test2)
+        print("test1")
+        display(test1)
+
+        print("test2")
+        display(test2)
 
     test1 = pd.melt(test1, id_vars=id_columns, var_name="day", value_name="demand")
     test2 = pd.melt(test2, id_vars=id_columns, var_name="day", value_name="demand")
