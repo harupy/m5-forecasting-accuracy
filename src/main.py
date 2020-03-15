@@ -497,8 +497,8 @@ id_date = data[~mask][["id", "date"]].reset_index(drop=True)
 del data
 gc.collect()
 
-print("Train shape:", X_train.shape)
-print("Test shape:", X_test.shape)
+print("X_train shape:", X_train.shape)
+print("X_test shape:", X_test.shape)
 
 
 # %% [code]
