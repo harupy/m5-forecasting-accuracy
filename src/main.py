@@ -390,7 +390,7 @@ class CustomTimeSeriesSplitter:
 # %% [code]
 cv_params = {
     "n_splits": 7,
-    "train_days": 365,
+    "train_days": 180,
     "test_days": 28,
     "dt_col": dt_col,
 }
