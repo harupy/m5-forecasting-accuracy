@@ -21,7 +21,7 @@ jobs:
       - name: Convert script to notebook
         run: ./tools/convert.sh
 
-      - uses: ./.github/actions/upload
+      - uses: harupy/push-kaggle-kernel@master
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
