@@ -484,7 +484,7 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask = data["date"] <= "2016-04-24"
+mask = (data["date"] >= "1970-01-01") & (data["date"] <= "2016-04-24")
 
 # Attach "date" to X_train for cross validation.
 X_train = data[mask][["date"] + features].reset_index(drop=True)
