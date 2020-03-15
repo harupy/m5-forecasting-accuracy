@@ -484,7 +484,7 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask = (data["date"] >= "1970-01-01") & (data["date"] <= "2016-04-24")
+mask = data["date"] <= "2016-04-24"
 
 # Attach "date" to X_train for cross validation.
 X_train = data[mask][["date"] + features].reset_index(drop=True)
@@ -509,7 +509,7 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
         drop_when_train = []
 
     for idx_fold, (idx_trn, idx_val) in enumerate(cv.split(X, y)):
-        print(f"\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
+        print("\n---------- Fold: ({idx_fold + 1} / {cv.get_n_splits()}) ----------\n")
 
         X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
         y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
