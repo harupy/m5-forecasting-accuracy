@@ -592,7 +592,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
-    F_cols = ["F" + str(x + 1) for x in range(DAYS_PRED)]
+    F_cols = ["F" + str(d + 1) for d in range(DAYS_PRED)]
     preds.columns = ["id"] + F_cols
 
     evals = submission[submission["id"].str.endswith("evaluation")]
