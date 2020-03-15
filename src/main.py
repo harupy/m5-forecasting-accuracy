@@ -513,6 +513,9 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
         )
         models.append(model)
 
+        del idx_trn, idx_val, X_trn, X_val, y_trn, y_val
+        gc.collect()
+
     return models
 
 
