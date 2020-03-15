@@ -430,6 +430,9 @@ cv = CustomTimeSeriesSplitter(**cv_params)
 plot_cv_indices(cv, data.iloc[::1000][[dt_col]].reset_index(drop=True), None, dt_col)
 
 
+# %% [markdown]
+# Blue: train, Orange: test
+
 # %% [code]
 features = [
     "item_id",
