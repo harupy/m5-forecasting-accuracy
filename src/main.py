@@ -208,7 +208,6 @@ def melt(
 
     del sales_train_val, vals, evals
 
-    # get only a sample for fast training.
     data = data.loc[nrows:]
 
     # delete evaluation for now.
