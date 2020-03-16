@@ -596,8 +596,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
     preds = preds.pivot(index="id", columns="date", values="demand").reset_index()
-    F_cols = ["F" + str(d + 1) for d in range(DAYS_PRED)]
-    preds.columns = ["id"] + F_cols
+    preds.columns = ["id"] + ["F" + str(d + 1) for d in range(DAYS_PRED)]
 
     evals = submission[submission["id"].str.endswith("evaluation")]
     vals = submission[["id"]].merge(preds, how="inner", on="id")
