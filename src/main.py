@@ -166,8 +166,8 @@ def melt(
     # get product table.
     product = sales_train_val[id_columns]
 
-    sales_train_val = pd.melt(
-        sales_train_val, id_vars=id_columns, var_name="day", value_name="demand",
+    sales_train_val = sales_train_val.melt(
+        id_vars=id_columns, var_name="d", value_name="demand",
     )
 
     sales_train_val = reduce_mem_usage(sales_train_val, verbose=False)
@@ -197,8 +197,8 @@ def melt(
         print("evaluation")
         display(evals)
 
-    vals = pd.melt(vals, id_vars=id_columns, var_name="day", value_name="demand")
-    evals = pd.melt(evals, id_vars=id_columns, var_name="day", value_name="demand")
+    vals = vals.melt(id_vars=id_columns, var_name="d", value_name="demand")
+    evals = evals.melt(id_vars=id_columns, var_name="d", value_name="demand")
 
     sales_train_val["part"] = "train"
     vals["part"] = "validation"
@@ -228,13 +228,13 @@ def merge_calendar(data, calendar):
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
 
     # notebook crashes with the entire dataset.
-    data = pd.merge(data, calendar, how="left", left_on=["day"], right_on=["d"])
-    return data.drop(["d", "day"], axis=1)
+    data = data.merge(calendar, how="left", on="d")
+    return data.drop("d", axis=1)
 
 
 def merge_sell_prices(data, sell_prices):
     # get the sell price data (this feature should be very important).
-    return data.merge(sell_prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
+    return data.merge(sell_prices, how="left", on=["store_id", "item_id", "wm_yr_wk"])
 
 
 # %% [code]
@@ -595,7 +595,7 @@ _ = mplt.feature_importance(features, importances, imp_type, limit=30)
 # %% [code]
 def make_submission(test, submission):
     preds = test[["id", "date", "demand"]]
-    preds = pd.pivot(preds, index="id", columns="date", values="demand").reset_index()
+    preds = preds.pivot(index="id", columns="date", values="demand").reset_index()
     F_cols = ["F" + str(d + 1) for d in range(DAYS_PRED)]
     preds.columns = ["id"] + F_cols
 
