@@ -384,27 +384,36 @@ class CustomTimeSeriesSplitter:
 
     def split(self, X, y=None, groups=None):
         sec = (X[self.dt_col] - X[self.dt_col][0]).dt.total_seconds()
-        duration = sec.max() - sec.min()
+        duration = sec.max()
 
         train_sec = 3600 * 24 * self.train_days
         test_sec = 3600 * 24 * self.test_days
         total_sec = test_sec + train_sec
         step = (duration - total_sec) / (self.n_splits - 1)
 
-        for idx in range(self.n_splits):
-            train_start = idx * step
+        if self.n_splits == 1:
+            train_start = duration - total_sec
             train_end = train_start + train_sec
-            test_end = train_end + test_sec
-
-            if idx == self.n_splits - 1:
-                test_mask = sec >= train_end
-            else:
-                test_mask = (sec >= train_end) & (sec < test_end)
 
             train_mask = (sec >= train_start) & (sec < train_end)
-            test_mask = (sec >= train_end) & (sec < test_end)
+            test_mask = sec >= train_end
 
             yield sec[train_mask].index.values, sec[test_mask].index.values
+
+        else:
+            for idx in range(self.n_splits):
+                train_start = idx * step
+                train_end = train_start + train_sec
+                test_end = train_end + test_sec
+
+                train_mask = (sec >= train_start) & (sec < train_end)
+
+                if idx == self.n_splits - 1:
+                    test_mask = sec >= train_end
+                else:
+                    test_mask = (sec >= train_end) & (sec < test_end)
+
+                yield sec[train_mask].index.values, sec[test_mask].index.values
 
     def get_n_splits(self):
         return self.n_splits
