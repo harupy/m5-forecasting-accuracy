@@ -101,7 +101,6 @@ def read_data():
     calendar = pd.read_csv(f"{INPUT_DIR}/calendar.csv").pipe(reduce_mem_usage)
     sell_prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
 
-    # Limit the number of columns to use to prevent OOM error.
     sales_train_val = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv",).pipe(
         reduce_mem_usage
     )
@@ -249,7 +248,6 @@ data = reduce_mem_usage(data)
 
 # %% [code]
 def add_demand_features(df):
-    # rolling demand features.
     for diff in [0, 1, 2]:
         shift = DAYS_PRED + diff
         df[f"shift_t{shift}"] = df.groupby(["id"])["demand"].transform(
@@ -276,7 +274,6 @@ def add_demand_features(df):
 
 
 def add_price_features(df):
-    # price features
     df["shift_price_t1"] = df.groupby(["id"])["sell_price"].transform(
         lambda x: x.shift(1)
     )
