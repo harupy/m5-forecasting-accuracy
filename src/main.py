@@ -137,7 +137,7 @@ def encode_categorical(df, cols, fillna=False):
     for col in cols:
         encoder = LabelEncoder()
         df[col] = encoder.fit_transform(
-            df[col].fillna("MISSING") if fillna else df[col]
+            df[col].fillna("__MISSING__") if fillna else df[col]
         )
     return df
 
