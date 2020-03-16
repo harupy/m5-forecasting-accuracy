@@ -224,16 +224,11 @@ def melt(
 
 
 def merge_calendar(data, calendar):
-    # drop some calendar features.
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
-
-    # notebook crashes with the entire dataset.
-    data = data.merge(calendar, how="left", on="d")
-    return data.drop("d", axis=1)
+    return data.merge(calendar, how="left", on="d").drop("d", axis=1)
 
 
 def merge_sell_prices(data, sell_prices):
-    # get the sell price data (this feature should be very important).
     return data.merge(sell_prices, how="left", on=["store_id", "item_id", "wm_yr_wk"])
 
 
