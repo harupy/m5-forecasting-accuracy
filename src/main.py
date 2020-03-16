@@ -603,7 +603,7 @@ def make_submission(test, submission):
     vals = submission[["id"]].merge(preds, how="inner", on="id")
     final = pd.concat([vals, evals])
 
-    assert final[F_cols].isnull().sum().sum() == 0
+    assert final.drop("id", axis=1).isnull().sum().sum() == 0
     assert final["id"].equals(submission["id"])
 
     final.to_csv("submission.csv", index=False)
