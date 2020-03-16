@@ -133,19 +133,18 @@ DAYS_PRED = submission.shape[1] - 1  # 28
 
 
 # %% [code]
-def encode_categorical(df, cols, fillna=False):
+def encode_categorical(df, cols):
     for col in cols:
-        encoder = LabelEncoder()
-        df[col] = encoder.fit_transform(
-            df[col].fillna("__MISSING__") if fillna else df[col]
-        )
+        # Leave NaN as it is.
+        le = LabelEncoder()
+        not_null = df[col][df[col].notnull()]
+        df[col] = pd.Series(le.fit_transform(not_null), index=not_null.index)
+
     return df
 
 
 calendar = encode_categorical(
-    calendar,
-    ["event_name_1", "event_type_1", "event_name_2", "event_type_2"],
-    fillna=True,
+    calendar, ["event_name_1", "event_type_1", "event_name_2", "event_type_2"]
 ).pipe(reduce_mem_usage)
 
 sales_train_val = encode_categorical(
