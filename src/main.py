@@ -221,9 +221,13 @@ def melt(
     return data
 
 
+def extract_d(df):
+    return df["d"].str.extract(r"d_(\d+)").astype(np.int16)
+
+
 def merge_calendar(data, calendar):
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
-    return data.merge(calendar, how="left", on="d").drop("d", axis=1)
+    return data.merge(calendar, how="left", on="d").assign(d=extract_d)
 
 
 def merge_sell_prices(data, sell_prices):
@@ -373,20 +377,19 @@ def plot_cv_indices(cv, X, y, dt_col, lw=10):
 
 # %% [code]
 class CustomTimeSeriesSplitter:
-    def __init__(self, n_splits=5, train_days=80, test_days=20, dt_col="date"):
+    def __init__(self, n_splits=5, train_days=80, test_days=20, day_col="d"):
         self.n_splits = n_splits
         self.train_days = train_days
         self.test_days = test_days
-        self.dt_col = dt_col
+        self.day_col = day_col
 
     def split(self, X, y=None, groups=None):
-        sec = (X[self.dt_col] - X[self.dt_col][0]).dt.total_seconds()
+        SEC_IN_DAY = 3600 * 24
+        sec = (X[self.day_col] - X[self.day_col].iloc[0]) * SEC_IN_DAY
         duration = sec.max()
 
-        DAYS_TO_SEC = 3600 * 24
-
-        train_sec = self.train_days * DAYS_TO_SEC
-        test_sec = self.test_days * DAYS_TO_SEC
+        train_sec = self.train_days * SEC_IN_DAY
+        test_sec = self.test_days * SEC_IN_DAY
         total_sec = test_sec + train_sec
 
         if self.n_splits == 1:
@@ -400,7 +403,7 @@ class CustomTimeSeriesSplitter:
 
         else:
             # step = (duration - total_sec) / (self.n_splits - 1)
-            step = DAYS_PRED * DAYS_TO_SEC / 2
+            step = DAYS_PRED * SEC_IN_DAY / 2
 
             for idx in range(self.n_splits):
                 # train_start = idx * step
@@ -427,11 +430,13 @@ cv_params = {
     "n_splits": 3,
     "train_days": 365 * 2,
     "test_days": DAYS_PRED,
-    "dt_col": dt_col,
+    "day_col": "d",
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
 # Plotting all the points takes long time.
-plot_cv_indices(cv, data.iloc[::1000][[dt_col]].reset_index(drop=True), None, dt_col)
+plot_cv_indices(
+    cv, data.iloc[::1000][["d", dt_col]].reset_index(drop=True), None, dt_col
+)
 
 
 # %% [markdown]
