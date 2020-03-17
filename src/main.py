@@ -412,12 +412,12 @@ class CustomTimeSeriesSplitter:
                 train_end = train_start + train_sec
                 test_end = train_end + test_sec
 
-                train_mask = (sec >= train_start) & (sec < train_end)
+                train_mask = (sec > train_start) & (sec <= train_end)
 
                 if idx == self.n_splits - 1:
-                    test_mask = sec >= train_end
+                    test_mask = sec > train_end
                 else:
-                    test_mask = (sec >= train_end) & (sec <= test_end)
+                    test_mask = (sec > train_end) & (sec <= test_end)
 
                 yield sec[train_mask].index.values, sec[test_mask].index.values
 
