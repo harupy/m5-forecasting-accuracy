@@ -417,7 +417,7 @@ class CustomTimeSeriesSplitter:
                 if idx == self.n_splits - 1:
                     test_mask = sec >= train_end
                 else:
-                    test_mask = (sec >= train_end) & (sec < test_end)
+                    test_mask = (sec >= train_end) & (sec <= test_end)
 
                 yield sec[train_mask].index.values, sec[test_mask].index.values
 
