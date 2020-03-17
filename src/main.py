@@ -426,16 +426,17 @@ class CustomTimeSeriesSplitter:
 
 
 # %% [code]
+day_col = "d"
 cv_params = {
     "n_splits": 2,
     "train_days": 365 * 2,
     "test_days": DAYS_PRED,
-    "day_col": "d",
+    "day_col": day_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
 # Plotting all the points takes long time.
 plot_cv_indices(
-    cv, data.iloc[::1000][["d", dt_col]].reset_index(drop=True), None, dt_col
+    cv, data.iloc[::1000][[day_col, dt_col]].reset_index(drop=True), None, dt_col
 )
 
 
@@ -501,7 +502,7 @@ features = [
 mask = data["date"] <= "2016-04-24"
 
 # Attach "d" to X_train for cross validation.
-X_train = data[mask][["d"] + features].reset_index(drop=True)
+X_train = data[mask][[day_col] + features].reset_index(drop=True)
 y_train = data[mask]["demand"].reset_index(drop=True)
 X_test = data[~mask][features].reset_index(drop=True)
 
@@ -565,7 +566,7 @@ fit_params = {
 }
 
 models = train_lgb(
-    bst_params, fit_params, X_train, y_train, cv, drop_when_train=[dt_col]
+    bst_params, fit_params, X_train, y_train, cv, drop_when_train=[day_col]
 )
 
 del X_train, y_train
