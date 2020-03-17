@@ -338,44 +338,6 @@ print("data shape:", data.shape)
 
 
 # %% [code]
-def plot_cv_indices(cv, X, y, dt_col, lw=10):
-    n_splits = cv.get_n_splits()
-    _, ax = plt.subplots(figsize=(20, n_splits))
-
-    # Generate the training/testing visualizations for each CV split
-    for ii, (tr, tt) in enumerate(cv.split(X=X, y=y)):
-        # Fill in indices with the training/test groups
-        indices = np.array([np.nan] * len(X))
-        indices[tt] = 1
-        indices[tr] = 0
-
-        # Visualize the results
-        ax.scatter(
-            X[dt_col],
-            [ii + 0.5] * len(indices),
-            c=indices,
-            marker="_",
-            lw=lw,
-            cmap=plt.cm.coolwarm,
-            vmin=-0.2,
-            vmax=1.2,
-        )
-
-    # Formatting
-    MIDDLE = 15
-    LARGE = 20
-    ax.set_xlabel("Datetime", fontsize=LARGE)
-    ax.set_xlim([X[dt_col].min(), X[dt_col].max()])
-    ax.set_ylabel("CV iteration", fontsize=LARGE)
-    ax.set_yticks(np.arange(n_splits) + 0.5)
-    ax.set_yticklabels(list(range(n_splits)))
-    ax.invert_yaxis()
-    ax.tick_params(axis="both", which="major", labelsize=MIDDLE)
-    ax.set_title("{}".format(type(cv).__name__), fontsize=LARGE)
-    return ax
-
-
-# %% [code]
 class CustomTimeSeriesSplitter:
     def __init__(self, n_splits=5, train_days=80, test_days=20, day_col="d"):
         self.n_splits = n_splits
@@ -434,14 +396,75 @@ cv_params = {
     "day_col": day_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
-# Plotting all the points takes long time.
-plot_cv_indices(
-    cv, data.iloc[::1000][[day_col, dt_col]].reset_index(drop=True), None, dt_col
-)
 
 
-# %% [markdown]
-# Blue: train, Orange: test
+# %% [code]
+def show_cv_days(cv, X, dt_col, day_col):
+    for ii, (tr, tt) in enumerate(cv.split(X)):
+        print(f"\n----- Fold: ({ii + 1} / {cv.n_splits}) -----\n")
+        tr_start = X.iloc[tr][dt_col].min()
+        tr_end = X.iloc[tr][dt_col].max()
+        tr_days = X.iloc[tr][day_col].max() - X.iloc[tr][day_col].min() + 1
+
+        tt_start = X.iloc[tt][dt_col].min()
+        tt_end = X.iloc[tt][dt_col].max()
+        tt_days = X.iloc[tt][day_col].max() - X.iloc[tt][day_col].min() + 1
+
+        print("# Train")
+        print("start:", tr_start)
+        print("end:", tr_end)
+        print("days:", tr_days)
+
+        print("\n# Test")
+        print("start:", tt_start)
+        print("end:", tt_end)
+        print("days:", tt_days)
+
+
+def plot_cv_indices(cv, X, dt_col, lw=10):
+    n_splits = cv.get_n_splits()
+    _, ax = plt.subplots(figsize=(20, n_splits))
+
+    # Generate the training/testing visualizations for each CV split
+    for ii, (tr, tt) in enumerate(cv.split(X)):
+        # Fill in indices with the training/test groups
+        indices = np.array([np.nan] * len(X))
+        indices[tt] = 1
+        indices[tr] = 0
+
+        # Visualize the results
+        ax.scatter(
+            X[dt_col],
+            [ii + 0.5] * len(indices),
+            c=indices,
+            marker="_",
+            lw=lw,
+            cmap=plt.cm.coolwarm,
+            vmin=-0.2,
+            vmax=1.2,
+        )
+
+    # Formatting
+    MIDDLE = 15
+    LARGE = 20
+    ax.set_xlabel("Datetime", fontsize=LARGE)
+    ax.set_xlim([X[dt_col].min(), X[dt_col].max()])
+    ax.set_ylabel("CV iteration", fontsize=LARGE)
+    ax.set_yticks(np.arange(n_splits) + 0.5)
+    ax.set_yticklabels(list(range(n_splits)))
+    ax.invert_yaxis()
+    ax.tick_params(axis="both", which="major", labelsize=MIDDLE)
+    ax.set_title("{}".format(type(cv).__name__), fontsize=LARGE)
+    return ax
+
+
+# %% [code]
+sample = data.iloc[::1000][[day_col, dt_col]].reset_index(drop=True)
+show_cv_days(cv, sample, dt_col, day_col)
+plot_cv_indices(cv, sample, dt_col)
+
+del sample
+gc.collect()
 
 # %% [code]
 features = [
