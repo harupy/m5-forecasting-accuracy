@@ -403,7 +403,7 @@ class CustomTimeSeriesSplitter:
 
         else:
             # step = (duration - total_sec) / (self.n_splits - 1)
-            step = DAYS_PRED * SEC_IN_DAY / 2
+            step = DAYS_PRED * SEC_IN_DAY
 
             for idx in range(self.n_splits):
                 # train_start = idx * step
@@ -427,7 +427,7 @@ class CustomTimeSeriesSplitter:
 
 # %% [code]
 cv_params = {
-    "n_splits": 3,
+    "n_splits": 2,
     "train_days": 365 * 2,
     "test_days": DAYS_PRED,
     "day_col": "d",
@@ -500,8 +500,8 @@ features = [
 
 mask = data["date"] <= "2016-04-24"
 
-# Attach "date" to X_train for cross validation.
-X_train = data[mask][["date"] + features].reset_index(drop=True)
+# Attach "d" to X_train for cross validation.
+X_train = data[mask][["d"] + features].reset_index(drop=True)
 y_train = data[mask]["demand"].reset_index(drop=True)
 X_test = data[~mask][features].reset_index(drop=True)
 
