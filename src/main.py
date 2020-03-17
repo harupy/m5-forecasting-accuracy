@@ -410,15 +410,16 @@ def show_cv_days(cv, X, dt_col, day_col):
         tt_end = X.iloc[tt][dt_col].max()
         tt_days = X.iloc[tt][day_col].max() - X.iloc[tt][day_col].min() + 1
 
-        print("# Train")
-        print("start:", tr_start)
-        print("end:", tr_end)
-        print("days:", tr_days)
+        df = pd.DataFrame(
+            {
+                "start": [tr_start, tt_start],
+                "end": [tr_end, tt_end],
+                "days": [tr_days, tt_days],
+            },
+            index=["train", "test"],
+        )
 
-        print("\n# Test")
-        print("start:", tt_start)
-        print("end:", tt_end)
-        print("days:", tt_days)
+        display(df)
 
 
 def plot_cv_indices(cv, X, dt_col, lw=10):
