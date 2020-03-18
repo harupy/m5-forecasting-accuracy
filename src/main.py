@@ -391,7 +391,7 @@ class CustomTimeSeriesSplitter:
 day_col = "d"
 cv_params = {
     "n_splits": 2,
-    "train_days": 365 * 2,
+    "train_days": int(365 * 2.5),
     "test_days": DAYS_PRED,
     "day_col": day_col,
 }
