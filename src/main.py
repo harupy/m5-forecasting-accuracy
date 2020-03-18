@@ -401,7 +401,7 @@ cv = CustomTimeSeriesSplitter(**cv_params)
 # %% [code]
 def show_cv_days(cv, X, dt_col, day_col):
     for ii, (tr, tt) in enumerate(cv.split(X)):
-        print(f"\n----- Fold: ({ii + 1} / {cv.n_splits}) -----\n")
+        print(f"----- Fold: ({ii + 1} / {cv.n_splits}) -----")
         tr_start = X.iloc[tr][dt_col].min()
         tr_end = X.iloc[tr][dt_col].max()
         tr_days = X.iloc[tr][day_col].max() - X.iloc[tr][day_col].min() + 1
