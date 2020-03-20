@@ -5,7 +5,7 @@ services:
       context: .
       args:
         WORKDIR: /m5-forecasting-accuracy
-    image: harupy:m5-forecasting-accuracy
+    image: harupy/m5-forecasting-accuracy
     container_name: m5-forecasting-accuracy
     volumes:
       - .:/m5-forecasting-accuracy
