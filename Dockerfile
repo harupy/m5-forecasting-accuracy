@@ -5,6 +5,9 @@ FROM continuumio/anaconda3:${BASE_TAG}
 ARG WORKDIR=/m5-forecasting-accuracy
 WORKDIR ${WORKDIR}
 
+# Copy requirements files.
 COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements-dev.txt /tmp/requirements-dev.txt
 
-RUN pip install -r /tmp/requirements.txt
+# Install requirements.
+RUN pip install -r /tmp/requirements.txt -r /tmp/requirements-dev.txt
