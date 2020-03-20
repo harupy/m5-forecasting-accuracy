@@ -5,6 +5,7 @@ on:
       - master
     paths:
       - Dockerfile
+      - .github/workflows/docker.yml
 
 jobs:
   docker:
@@ -17,3 +18,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: harupy/m5-forecasting-accuracy
+          tags: latest
