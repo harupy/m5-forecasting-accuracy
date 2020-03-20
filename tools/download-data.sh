@@ -5,7 +5,7 @@ zip_name="${slug}.zip"
 out_dir="input/${slug}"
 
 # Make the output director if it does not exists.
-if [ -d "$out_dir" ]; then
+if [ ! -d "$out_dir" ]; then
   mkdir -p $out_dir
 fi
 
