@@ -365,7 +365,7 @@ class CustomTimeSeriesSplitter:
 
         else:
             # step = (duration - total_sec) / (self.n_splits - 1)
-            step = DAYS_PRED * SEC_IN_DAY
+            step = (DAYS_PRED // 4) * SEC_IN_DAY
 
             for idx in range(self.n_splits):
                 # train_start = idx * step
@@ -392,7 +392,7 @@ day_col = "d"
 cv_params = {
     "n_splits": 3,
     "train_days": 365 * 2,
-    "test_days": DAYS_PRED // 4,
+    "test_days": DAYS_PRED,
     "day_col": day_col,
 }
 cv = CustomTimeSeriesSplitter(**cv_params)
