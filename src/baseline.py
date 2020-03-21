@@ -118,7 +118,7 @@ def read_data():
     # sales_train_val shape: (30490, 1919)
     # submission shape: (60980, 29)
 
-    return prices, sales, calendar, submission
+    return sales, prices, calendar, submission
 
 
 # %% [code]
