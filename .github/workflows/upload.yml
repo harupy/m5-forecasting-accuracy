@@ -4,7 +4,7 @@ on:
     branches:
       - master
     paths:
-      - "src/main.py"
+      - "src/baseline.py"
 
 jobs:
   upload:
@@ -31,7 +31,7 @@ jobs:
         with:
           slug: m5-baseline
           title: m5-baseline
-          code_file: ./src/main.ipynb
+          code_file: ./src/baseline.ipynb
           language: python
           kernel_type: notebook
           is_private: false

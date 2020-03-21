@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-jupytext --to notebook src/main.py
+jupytext --to notebook src/baseline.py
