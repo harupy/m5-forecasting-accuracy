@@ -51,7 +51,7 @@ if on_kaggle():
 
 
 # %% [code]
-def reduce_mem_usage(df, verbose=True):
+def reduce_mem_usage(df, verbose=False):
     numerics = ["int16", "int32", "int64", "float16", "float32", "float64"]
     start_mem = df.memory_usage().sum() / 1024 ** 2
     for col in df.columns:
@@ -99,18 +99,18 @@ def read_data():
     print("Reading files...")
 
     calendar = pd.read_csv(f"{INPUT_DIR}/calendar.csv").pipe(reduce_mem_usage)
-    sell_prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
+    prices = pd.read_csv(f"{INPUT_DIR}/sell_prices.csv").pipe(reduce_mem_usage)
 
-    sales_train_val = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv",).pipe(
+    sales = pd.read_csv(f"{INPUT_DIR}/sales_train_validation.csv",).pipe(
         reduce_mem_usage
     )
     submission = pd.read_csv(f"{INPUT_DIR}/sample_submission.csv").pipe(
         reduce_mem_usage
     )
 
+    print("sales shape:", sales.shape)
+    print("prices shape:", prices.shape)
     print("calendar shape:", calendar.shape)
-    print("sell_prices shape:", sell_prices.shape)
-    print("sales_train_val shape:", sales_train_val.shape)
     print("submission shape:", submission.shape)
 
     # calendar shape: (1969, 14)
@@ -118,13 +118,13 @@ def read_data():
     # sales_train_val shape: (30490, 1919)
     # submission shape: (60980, 29)
 
-    return calendar, sell_prices, sales_train_val, submission
+    return prices, sales, calendar, submission
 
 
 # %% [code]
-calendar, sell_prices, sales_train_val, submission = read_data()
+sales, prices, calendar, submission = read_data()
 
-NUM_ITEMS = sales_train_val.shape[0]  # 30490
+NUM_ITEMS = sales.shape[0]  # 30490
 DAYS_PRED = submission.shape[1] - 1  # 28
 
 # %% [markdown]
@@ -146,34 +146,29 @@ calendar = encode_categorical(
     calendar, ["event_name_1", "event_type_1", "event_name_2", "event_type_2"]
 ).pipe(reduce_mem_usage)
 
-sales_train_val = encode_categorical(
-    sales_train_val, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
+sales = encode_categorical(
+    sales, ["item_id", "dept_id", "cat_id", "store_id", "state_id"],
 ).pipe(reduce_mem_usage)
 
-sell_prices = encode_categorical(sell_prices, ["item_id", "store_id"]).pipe(
-    reduce_mem_usage
-)
+prices = encode_categorical(prices, ["item_id", "store_id"]).pipe(reduce_mem_usage)
 
 
 # %% [code]
 def melt(
-    sales_train_val, submission, nrows=55_000_000, verbose=True,
+    sales, submission, nrows=55_000_000, verbose=True,
 ):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
 
     # get product table.
-    product = sales_train_val[id_columns]
+    product = sales[id_columns]
 
-    sales_train_val = sales_train_val.melt(
-        id_vars=id_columns, var_name="d", value_name="demand",
-    )
-
-    sales_train_val = reduce_mem_usage(sales_train_val, verbose=False)
+    sales = sales.melt(id_vars=id_columns, var_name="d", value_name="demand",)
+    sales = reduce_mem_usage(sales)
 
     if verbose:
         print("melted")
-        display(sales_train_val)
+        display(sales)
 
     # separate test dataframes.
     vals = submission[submission["id"].str.endswith("validation")]
@@ -199,13 +194,13 @@ def melt(
     vals = vals.melt(id_vars=id_columns, var_name="d", value_name="demand")
     evals = evals.melt(id_vars=id_columns, var_name="d", value_name="demand")
 
-    sales_train_val["part"] = "train"
+    sales["part"] = "train"
     vals["part"] = "validation"
     evals["part"] = "evaluation"
 
-    data = pd.concat([sales_train_val, vals, evals], axis=0)
+    data = pd.concat([sales, vals, evals], axis=0)
 
-    del sales_train_val, vals, evals
+    del sales, vals, evals
 
     data = data.loc[nrows:]
 
@@ -230,21 +225,21 @@ def merge_calendar(data, calendar):
     return data.merge(calendar, how="left", on="d").assign(d=extract_d)
 
 
-def merge_sell_prices(data, sell_prices):
-    return data.merge(sell_prices, how="left", on=["store_id", "item_id", "wm_yr_wk"])
+def merge_prices(data, prices):
+    return data.merge(prices, how="left", on=["store_id", "item_id", "wm_yr_wk"])
 
 
 # %% [code]
-data = melt(sales_train_val, submission, nrows=27_500_000)
-del sales_train_val
+data = melt(sales, submission, nrows=27_500_000)
+del sales
 gc.collect()
 
 data = merge_calendar(data, calendar)
 del calendar
 gc.collect()
 
-data = merge_sell_prices(data, sell_prices)
-del sell_prices
+data = merge_prices(data, prices)
+del prices
 gc.collect()
 
 data = reduce_mem_usage(data)
@@ -258,14 +253,14 @@ def add_demand_features(df):
             lambda x: x.shift(shift)
         )
 
-    for size in [7, 30, 60, 90, 180]:
-        df[f"rolling_std_t{size}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(DAYS_PRED).rolling(size).std()
+    for window in [7, 30, 60, 90, 180]:
+        df[f"rolling_std_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).std()
         )
 
-    for size in [7, 30, 60, 90, 180]:
-        df[f"rolling_mean_t{size}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(DAYS_PRED).rolling(size).mean()
+    for window in [7, 30, 60, 90, 180]:
+        df[f"rolling_mean_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).mean()
         )
 
     df["rolling_skew_t30"] = df.groupby(["id"])["demand"].transform(
@@ -365,7 +360,7 @@ class CustomTimeSeriesSplitter:
 
         else:
             # step = (duration - total_sec) / (self.n_splits - 1)
-            step = (DAYS_PRED // 4) * SEC_IN_DAY
+            step = DAYS_PRED * SEC_IN_DAY
 
             for idx in range(self.n_splits):
                 # train_start = idx * step
@@ -626,8 +621,8 @@ def make_submission(test, submission):
     preds = preds.pivot(index="id", columns="date", values="demand").reset_index()
     preds.columns = ["id"] + ["F" + str(d + 1) for d in range(DAYS_PRED)]
 
-    evals = submission[submission["id"].str.endswith("evaluation")]
     vals = submission[["id"]].merge(preds, how="inner", on="id")
+    evals = submission[submission["id"].str.endswith("evaluation")]
     final = pd.concat([vals, evals])
 
     assert final.drop("id", axis=1).isnull().sum().sum() == 0
