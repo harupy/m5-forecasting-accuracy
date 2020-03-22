@@ -5,6 +5,7 @@ on:
       - master
     paths:
       - src/baseline.py
+      - ./github/workflows/upload-baseline.yml
 
 jobs:
   upload:
