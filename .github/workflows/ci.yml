@@ -23,3 +23,6 @@ jobs:
 
       - name: Formatting
         run: black --check .
+
+      - name: Verify scripts can be converted into notebooks
+        run: ./tools/convert.sh
