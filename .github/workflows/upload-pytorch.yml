@@ -1,10 +1,11 @@
-name: Upload
+name: Upload pytorch
 on:
   push:
     branches:
       - master
     paths:
-      - "src/baseline.py"
+      - src/pytorch_embeddings.py
+      - ./github/workflows/upload-pytorch.yml
 
 jobs:
   upload:
@@ -22,19 +23,20 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Convert script to notebook
-        run: ./tools/convert.sh
+        run: jupytext --to notebook src/pytorch_embeddings.py
 
       - uses: harupy/push-kaggle-kernel@master
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: m5-baseline
-          title: m5-baseline
-          code_file: ./src/baseline.ipynb
+          slug: m5-pytorch-embeddings
+          title: m5-pytorch-embeddings
+          code_file: ./src/pytorch_embeddings.ipynb
           language: python
           kernel_type: notebook
           is_private: false
+          enable_gpu: true
           enable_internet: true
           competition_sources: |
             m5-forecasting-accuracy

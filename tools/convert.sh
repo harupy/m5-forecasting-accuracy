@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-jupytext --to notebook src/baseline.py
+for file in $(find src -type f -name '*.py')
+do
+  if grep -q "# %%" "$file"; then
+    jupytext --to notebook $file
+  fi
+done
