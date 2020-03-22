@@ -154,7 +154,7 @@ prices = encode_categorical(prices, ["item_id", "store_id"]).pipe(reduce_mem_usa
 
 
 # %% [code]
-def melt(
+def reshape_sales(
     sales, submission, nrows=55_000_000, verbose=True,
 ):
     # melt sales data, get it ready for training
@@ -230,7 +230,7 @@ def merge_prices(data, prices):
 
 
 # %% [code]
-data = melt(sales, submission, nrows=27_500_000)
+data = reshape_sales(sales, submission, nrows=27_500_000)
 del sales
 gc.collect()
 
