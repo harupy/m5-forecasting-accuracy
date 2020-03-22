@@ -512,15 +512,15 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask = data["d"] < 1914
+is_train = data["d"] < 1914
 
 # Attach "d" to X_train for cross validation.
-X_train = data[mask][[day_col] + features].reset_index(drop=True)
-y_train = data[mask]["demand"].reset_index(drop=True)
-X_test = data[~mask][features].reset_index(drop=True)
+X_train = data[is_train][[day_col] + features].reset_index(drop=True)
+y_train = data[is_train]["demand"].reset_index(drop=True)
+X_test = data[~is_train][features].reset_index(drop=True)
 
 # keep these two columns to use later.
-id_date = data[~mask][["id", "date"]].reset_index(drop=True)
+id_date = data[~is_train][["id", "date"]].reset_index(drop=True)
 
 del data
 gc.collect()
