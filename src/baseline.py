@@ -11,8 +11,8 @@
 # * This competition has 2 stages, so the main objective is to make a model that can predict the demand for the next 28 days.
 
 # %% [code]
-import gc
 import os
+import gc
 import warnings
 
 import pandas as pd
@@ -154,8 +154,12 @@ prices = encode_categorical(prices, ["item_id", "store_id"]).pipe(reduce_mem_usa
 
 
 # %% [code]
+def extract_num(ser):
+    return ser.str.extract(r"(\d+)").astype(np.int16)
+
+
 def reshape_sales(
-    sales, submission, nrows=55_000_000, verbose=True,
+    sales, submission, d_thresh=0, verbose=True,
 ):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
@@ -202,7 +206,8 @@ def reshape_sales(
 
     del sales, vals, evals
 
-    data = data.loc[nrows:]
+    data["d"] = extract_num(data["d"])
+    data = data[data["d"] >= d_thresh]
 
     # delete evaluation for now.
     data = data[data["part"] != "evaluation"]
@@ -216,13 +221,9 @@ def reshape_sales(
     return data
 
 
-def extract_d(df):
-    return df["d"].str.extract(r"d_(\d+)").astype(np.int16)
-
-
 def merge_calendar(data, calendar):
     calendar = calendar.drop(["weekday", "wday", "month", "year"], axis=1)
-    return data.merge(calendar, how="left", on="d").assign(d=extract_d)
+    return data.merge(calendar, how="left", on="d")
 
 
 def merge_prices(data, prices):
@@ -230,10 +231,11 @@ def merge_prices(data, prices):
 
 
 # %% [code]
-data = reshape_sales(sales, submission, nrows=27_500_000)
+data = reshape_sales(sales, submission, d_thresh=1941 - 365 * 3)
 del sales
 gc.collect()
 
+calendar["d"] = extract_num(calendar["d"])
 data = merge_calendar(data, calendar)
 del calendar
 gc.collect()
@@ -510,7 +512,7 @@ features = [
 # 2016-04-25 ~ 2016-05-22 : d_1914 ~ d_1941 (public)
 # 2016-05-23 ~ 2016-06-19 : d_1942 ~ d_1969 (private)
 
-mask = data["date"] <= "2016-04-24"
+mask = data["d"] < 1914
 
 # Attach "d" to X_train for cross validation.
 X_train = data[mask][[day_col] + features].reset_index(drop=True)
