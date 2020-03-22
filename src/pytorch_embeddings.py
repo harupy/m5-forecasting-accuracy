@@ -225,7 +225,7 @@ def merge_prices(data, prices):
 
 
 # %% [code]
-data = reshape_sales(sales, submission, d_thresh=1941 - 365 * 3)
+data = reshape_sales(sales, submission, d_thresh=1914 - 365)
 del sales
 gc.collect()
 
@@ -484,7 +484,7 @@ class TabularDataset(Dataset):
 train_set = TabularDataset(X_train[cat_cols + num_cols], cat_cols, y_train)
 test_set = TabularDataset(X_test[cat_cols + num_cols], cat_cols)
 
-batch_size = 64
+batch_size = 128
 train_loader = DataLoader(train_set, batch_size, shuffle=True, num_workers=4)
 test_loader = DataLoader(test_set, batch_size, shuffle=False, num_workers=4)
 
@@ -522,7 +522,6 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         running_loss += loss.item()
-        print("RMSE:", loss.item())
 
     running_loss /= len(train_loader)
     loss_epoch.append(running_loss)
