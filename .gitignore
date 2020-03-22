@@ -8,7 +8,7 @@ mlruns/
 .vscode/
 
 # Notebook
-src/baseline.ipynb
+src/*.ipynb
 
 # kaggle data
 input/
