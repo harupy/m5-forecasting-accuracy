@@ -1,0 +1,40 @@
+name: Upload
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - src/baseline.py
+
+jobs:
+  upload:
+    name: Upload Kernel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Convert script to notebook
+        run: jupytext --to notebook src/baseline.py
+
+      - uses: harupy/push-kaggle-kernel@master
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        with:
+          slug: m5-baseline
+          title: m5-baseline
+          code_file: ./src/baseline.ipynb
+          language: python
+          kernel_type: notebook
+          is_private: false
+          enable_internet: true
+          competition_sources: |
+            m5-forecasting-accuracy
