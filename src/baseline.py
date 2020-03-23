@@ -206,7 +206,7 @@ def merge_prices(data, prices):
 
 
 # %% [code]
-data = reshape_sales(sales, submission, d_thresh=1941 - int(365 * 2.25))
+data = reshape_sales(sales, submission, d_thresh=1941 - int(365 * 2))
 del sales
 gc.collect()
 
@@ -367,7 +367,7 @@ class CustomTimeSeriesSplitter:
 day_col = "d"
 cv_params = {
     "n_splits": 3,
-    "train_days": int(365 * 1.75),
+    "train_days": int(365 * 1.5),
     "test_days": DAYS_PRED,
     "day_col": day_col,
 }
