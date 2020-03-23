@@ -544,12 +544,12 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
         train_set = lgb.Dataset(
             X_trn.drop(drop_when_train, axis=1),
             label=y_trn,
-            categorical_feature=["dept_id"],
+            categorical_feature=["item_id"],
         )
         val_set = lgb.Dataset(
             X_val.drop(drop_when_train, axis=1),
             label=y_val,
-            categorical_feature=["dept_id"],
+            categorical_feature=["item_id"],
         )
 
         model = lgb.train(
