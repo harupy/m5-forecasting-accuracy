@@ -140,9 +140,7 @@ def extract_num(ser):
     return ser.str.extract(r"(\d+)").astype(np.int16)
 
 
-def reshape_sales(
-    sales, submission, d_thresh=0, verbose=True,
-):
+def reshape_sales(sales, submission, d_thresh=0, verbose=True):
     # melt sales data, get it ready for training
     id_columns = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
 
@@ -151,10 +149,6 @@ def reshape_sales(
 
     sales = sales.melt(id_vars=id_columns, var_name="d", value_name="demand",)
     sales = reduce_mem_usage(sales)
-
-    if verbose:
-        print("melted")
-        display(sales)
 
     # separate test dataframes.
     vals = submission[submission["id"].str.endswith("validation")]
