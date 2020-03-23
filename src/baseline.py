@@ -492,6 +492,7 @@ features = [
     "rolling_price_std_t30",
     # time features
     "year",
+    "quarter",
     "month",
     "week",
     "day",
