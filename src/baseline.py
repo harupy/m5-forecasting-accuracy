@@ -206,7 +206,7 @@ def merge_prices(data, prices):
 
 
 # %% [code]
-data = reshape_sales(sales, submission, d_thresh=1941 - 365 * 3)
+data = reshape_sales(sales, submission, d_thresh=1941 - int(365 * 2.5))
 del sales
 gc.collect()
 
