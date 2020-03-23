@@ -282,12 +282,6 @@ def add_time_features(df, dt_col):
         "week",
         "day",
         "dayofweek",
-        "is_year_end",
-        "is_year_start",
-        "is_quarter_end",
-        "is_quarter_start",
-        "is_month_end",
-        "is_month_start",
     ]
 
     for attr in attrs:
