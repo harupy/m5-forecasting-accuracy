@@ -241,13 +241,13 @@ def add_demand_features(df):
         )
 
     for window in [7, 30, 60]:
-        df[f"rolling_max_t{window}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(DAYS_PRED).rolling(window).std()
+        df[f"rolling_min_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).min()
         )
 
     for window in [7, 30, 60]:
-        df[f"rolling_min_t{window}"] = df.groupby(["id"])["demand"].transform(
-            lambda x: x.shift(DAYS_PRED).rolling(window).std()
+        df[f"rolling_max_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).max()
         )
 
     df["rolling_skew_t30"] = df.groupby(["id"])["demand"].transform(
@@ -452,6 +452,8 @@ features = [
     "state_id",
     "event_name_1",
     "event_type_1",
+    "event_name_2",
+    "event_type_2",
     "snap_CA",
     "snap_TX",
     "snap_WI",
@@ -460,16 +462,27 @@ features = [
     "shift_t28",
     "shift_t29",
     "shift_t30",
+    # std
     "rolling_std_t7",
     "rolling_std_t30",
     "rolling_std_t60",
     "rolling_std_t90",
     "rolling_std_t180",
+    # mean
     "rolling_mean_t7",
     "rolling_mean_t30",
     "rolling_mean_t60",
     "rolling_mean_t90",
     "rolling_mean_t180",
+    # min
+    "rolling_min_t7",
+    "rolling_min_t30",
+    "rolling_min_t60",
+    # max
+    "rolling_max_t7",
+    "rolling_max_t30",
+    "rolling_max_t60",
+    # others
     "rolling_skew_t30",
     "rolling_kurt_t30",
     # price features
