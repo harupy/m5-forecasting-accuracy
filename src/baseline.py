@@ -541,8 +541,16 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
 
         X_trn, X_val = X.iloc[idx_trn], X.iloc[idx_val]
         y_trn, y_val = y.iloc[idx_trn], y.iloc[idx_val]
-        train_set = lgb.Dataset(X_trn.drop(drop_when_train, axis=1), label=y_trn)
-        val_set = lgb.Dataset(X_val.drop(drop_when_train, axis=1), label=y_val)
+        train_set = lgb.Dataset(
+            X_trn.drop(drop_when_train, axis=1),
+            label=y_trn,
+            categorical_feature=["dept_id"],
+        )
+        val_set = lgb.Dataset(
+            X_val.drop(drop_when_train, axis=1),
+            label=y_val,
+            categorical_feature=["dept_id"],
+        )
 
         model = lgb.train(
             bst_params,
