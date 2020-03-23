@@ -458,7 +458,7 @@ features = [
     "snap_TX",
     "snap_WI",
     "sell_price",
-    # demand features.
+    # demand features
     "shift_t28",
     "shift_t29",
     "shift_t30",
@@ -490,7 +490,7 @@ features = [
     "price_change_t365",
     "rolling_price_std_t7",
     "rolling_price_std_t30",
-    # time features.
+    # time features
     "year",
     "month",
     "week",
