@@ -75,8 +75,7 @@ def reduce_mem_usage(df, verbose=False):
 # %% [code]
 def read_data():
     INPUT_DIR = "/kaggle/input" if on_kaggle() else "input"
-    # INPUT_DIR = f"{INPUT_DIR}/m5-forecasting-accuracy"
-    INPUT_DIR = f"{INPUT_DIR}/sample"
+    INPUT_DIR = f"{INPUT_DIR}/m5-forecasting-accuracy"
 
     print("Reading files...")
 
