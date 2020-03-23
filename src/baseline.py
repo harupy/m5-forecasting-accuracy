@@ -241,6 +241,16 @@ def add_demand_features(df):
             lambda x: x.shift(DAYS_PRED).rolling(window).mean()
         )
 
+    for window in [7, 30, 60]:
+        df[f"rolling_max_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).std()
+        )
+
+    for window in [7, 30, 60]:
+        df[f"rolling_min_t{window}"] = df.groupby(["id"])["demand"].transform(
+            lambda x: x.shift(DAYS_PRED).rolling(window).std()
+        )
+
     df["rolling_skew_t30"] = df.groupby(["id"])["demand"].transform(
         lambda x: x.shift(DAYS_PRED).rolling(30).skew()
     )
