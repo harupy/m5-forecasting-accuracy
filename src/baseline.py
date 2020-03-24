@@ -564,7 +564,7 @@ def train_lgb(bst_params, fit_params, X, y, cv, drop_when_train=None):
 bst_params = {
     "boosting_type": "gbdt",
     "metric": "rmse",
-    "objective": "regression",
+    "objective": "poisson",
     "n_jobs": -1,
     "seed": 42,
     "learning_rate": 0.1,
