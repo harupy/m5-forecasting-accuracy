@@ -567,6 +567,8 @@ bst_params = {
     "objective": "poisson",
     "n_jobs": -1,
     "seed": 42,
+    "alpha": 0.1,
+    "lambda": 0.1,
     "learning_rate": 0.1,
     "bagging_fraction": 0.75,
     "bagging_freq": 10,
