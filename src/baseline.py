@@ -53,8 +53,8 @@ if on_kaggle():
 # %% [code]
 def reduce_mem_usage(df, verbose=False):
     start_mem = df.memory_usage().sum() / 1024 ** 2
-    int_columns = df.select_dtypes(include=["int16", "int32", "int64"]).columns
-    float_columns = df.select_dtypes(include=["float16", "float32", "float64"]).columns
+    int_columns = df.select_dtypes(include=["int"]).columns
+    float_columns = df.select_dtypes(include=["float"]).columns
 
     for col in int_columns:
         df[col] = pd.to_numeric(df[col], downcast="integer")
