@@ -30,8 +30,8 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: m5-baseline
-          title: m5-baseline
+          slug: m5-forecast-python
+          title: m5-forecast-python
           code_file: ./src/m5_forecast_python.ipynb
           language: python
           kernel_type: notebook

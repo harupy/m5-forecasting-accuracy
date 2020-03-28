@@ -23,7 +23,10 @@ import seaborn as sns
 import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
+import IPython
 
+
+# %% [code]
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", 500)
 pd.set_option("display.max_rows", 500)
@@ -32,15 +35,11 @@ sns.set()
 
 
 # %% [code]
-import IPython
-
-
 def display(*dfs, head=True):
     for df in dfs:
         IPython.display.display(df.head() if head else df)
 
 
-# %% [code]
 def on_kaggle():
     return "KAGGLE_KERNEL_RUN_TYPE" in os.environ
 
