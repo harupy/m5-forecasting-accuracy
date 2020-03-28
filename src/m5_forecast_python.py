@@ -216,7 +216,12 @@ def add_time_features(df):
     return df
 
 
-sales = sales.pipe(add_sales_features).pipe(add_price_features).pipe(add_time_features)
+sales = (
+    sales.pipe(add_sales_features)
+    .pipe(add_price_features)
+    .pipe(add_time_features)
+    .dropna()
+)
 
 
 # %% [code]
