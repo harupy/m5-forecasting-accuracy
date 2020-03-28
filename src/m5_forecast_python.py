@@ -291,7 +291,6 @@ bst_params = {
     "objective": "poisson",
     "metric": "rmse",
     "learning_rate": 0.075,
-    "force_row_wise": True,
     "sub_feature": 0.8,
     "sub_row": 0.75,
     "bagging_freq": 1,
