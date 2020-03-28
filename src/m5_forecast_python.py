@@ -164,7 +164,7 @@ gc.collect()
 
 
 # %% [code]
-def add_demand_features(df):
+def add_sales_features(df):
     for lag in [7, 28, 29]:
         df[f"lag_{lag}"] = df.groupby(["id"])["sales"].transform(lambda x: x.shift(lag))
 
@@ -216,7 +216,7 @@ def add_time_features(df):
     return df
 
 
-sales = sales.pipe(add_demand_features).pipe(add_price_features).pipe(add_time_features)
+sales = sales.pipe(add_sales_features).pipe(add_price_features).pipe(add_time_features)
 
 
 # %% [code]
