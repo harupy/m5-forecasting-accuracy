@@ -171,9 +171,8 @@ cat_features = [
     "event_type_1",
     "event_type_2",
 ]
-useless_cols = ["id", "date", "sales", "d", "wm_yr_wk", "weekday"]
-train_cols = sales.columns[~sales.columns.isin(useless_cols)]
-X_train = sales[train_cols]
+drop_cols = ["id", "date", "sales", "d", "wm_yr_wk", "weekday"]
+X_train = sales.drop(drop_cols, axis=1)
 y_train = sales["sales"]
 
 
@@ -240,7 +239,7 @@ for idx, (alpha, weight) in enumerate(zip(alphas, weights)):
         mask = (te["date"] >= day - timedelta(days=max_lags)) & (te["date"] <= day)
         tst = te[mask].copy()
         tst = apply_funcs(tst, funcs)
-        tst = tst.loc[tst["date"] == day, train_cols]
+        tst = tst.loc[tst["date"] == day, model.feature_name()]
         te.loc[te["date"] == day, "sales"] = alpha * model.predict(tst)
 
     te_sub = te.loc[te["date"] >= fday, ["id", "sales"]].copy()
