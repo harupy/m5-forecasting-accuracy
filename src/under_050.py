@@ -177,28 +177,13 @@ y_train = sales["sales"]
 
 
 # %% [code]
-np.random.seed(777)
-
-size = min(2_000_000, int(len(X_train) * 0.1))
-
-valid_inds = np.random.choice(X_train.index.values, size, replace=False)
-train_inds = np.setdiff1d(X_train.index.values, valid_inds)
 train_set = lgb.Dataset(
-    X_train.loc[train_inds],
-    label=y_train.loc[train_inds],
-    categorical_feature=cat_features,
-    free_raw_data=False,
+    X_train, label=y_train, categorical_feature=cat_features, free_raw_data=False,
 )
 
-valid_set = lgb.Dataset(
-    X_train.loc[valid_inds],
-    label=y_train.loc[valid_inds],
-    categorical_feature=cat_features,
-    free_raw_data=False,
-)
 
 # %% [code]
-del sales, X_train, y_train, valid_inds, train_inds
+del sales, X_train, y_train
 gc.collect()
 
 # %% [code]
@@ -222,7 +207,7 @@ train_params = {
 
 
 # %% [code]
-model = lgb.train(bst_params, train_set, valid_sets=[valid_set], **train_params)
+model = lgb.train(bst_params, train_set, **train_params)
 
 
 # %% [code]
