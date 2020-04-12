@@ -140,7 +140,7 @@ def add_time_features(df):
 
 
 def apply_funcs(df, funcs):
-    reduce(lambda x, f: f(x), funcs, df)
+    return reduce(lambda x, f: f(x), funcs, df)
 
 
 # %% [code]
