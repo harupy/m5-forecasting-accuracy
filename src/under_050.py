@@ -6,6 +6,7 @@
 # * [M5 First Public Notebook Under 0.50](https://www.kaggle.com/kneroma/m5-first-public-notebook-under-0-50)
 
 # %% [code]
+from functools import reduce
 from datetime import datetime, timedelta
 import gc
 
@@ -67,7 +68,7 @@ def read_calendar():
     return cal
 
 
-def create_dt(is_train=True, nrows=None, first_day=1200):
+def create_sales(is_train=True, nrows=None, first_day=1200):
     start_day = max(1 if is_train else tr_last - max_lags, first_day)
     d_cols = [f"d_{day}" for day in range(start_day, tr_last + 1)]
     id_cols = ["id", "item_id", "dept_id", "store_id", "cat_id", "state_id"]
@@ -88,7 +89,6 @@ def create_dt(is_train=True, nrows=None, first_day=1200):
     if not is_train:
         for day in range(tr_last + 1, tr_last + h + 1):
             sales[f"d_{day}"] = np.nan
-        print(sales)
 
     prices = read_prices()
     cal = read_calendar()
@@ -101,7 +101,7 @@ def create_dt(is_train=True, nrows=None, first_day=1200):
 
 
 # %% [code]
-def create_fea(df):
+def add_lag_features(df):
     lags = [7, 28]
     for lag in lags:
         col = f"lag_{lag}"
@@ -117,7 +117,10 @@ def create_fea(df):
                 .groupby("id")[lag_col]
                 .transform(lambda x: x.rolling(win).mean())
             )
+    return df
 
+
+def add_time_features(df):
     time_features = {
         "wday": "weekday",
         "week": "weekofyear",
@@ -136,32 +139,28 @@ def create_fea(df):
     return df
 
 
-# %% [code]
-df = create_dt(is_train=True, first_day=350)
-
-# %% [code]
-df.head()
-
-# %% [code]
-df.info()
+def apply_funcs(df, funcs):
+    reduce(lambda x, f: f(x), funcs, df)
 
 
 # %% [code]
-df = create_fea(df)
-df.shape
+sales = create_sales(is_train=True, first_day=350)
 
 # %% [code]
-df.info()
+sales.head()
 
 # %% [code]
-df.head()
+funcs = [add_lag_features, add_time_features]
+sales = apply_funcs(sales, funcs)
 
 # %% [code]
-df = df.dropna()
-df.shape
+sales.head()
 
 # %% [code]
-cat_feats = [
+sales = sales.dropna()
+
+# %% [code]
+cat_features = [
     "item_id",
     "dept_id",
     "store_id",
@@ -173,9 +172,9 @@ cat_feats = [
     "event_type_2",
 ]
 useless_cols = ["id", "date", "sales", "d", "wm_yr_wk", "weekday"]
-train_cols = df.columns[~df.columns.isin(useless_cols)]
-X_train = df[train_cols]
-y_train = df["sales"]
+train_cols = sales.columns[~sales.columns.isin(useless_cols)]
+X_train = sales[train_cols]
+y_train = sales["sales"]
 
 
 # %% [code]
@@ -188,19 +187,19 @@ train_inds = np.setdiff1d(X_train.index.values, valid_inds)
 train_set = lgb.Dataset(
     X_train.loc[train_inds],
     label=y_train.loc[train_inds],
-    categorical_feature=cat_feats,
+    categorical_feature=cat_features,
     free_raw_data=False,
 )
 
 valid_set = lgb.Dataset(
     X_train.loc[valid_inds],
     label=y_train.loc[valid_inds],
-    categorical_feature=cat_feats,
+    categorical_feature=cat_features,
     free_raw_data=False,
 )
 
 # %% [code]
-del df, X_train, y_train, valid_inds, train_inds
+del sales, X_train, y_train, valid_inds, train_inds
 gc.collect()
 
 # %% [code]
@@ -233,15 +232,14 @@ weights = [1 / len(alphas)] * len(alphas)
 
 for idx, (alpha, weight) in enumerate(zip(alphas, weights)):
 
-    te = create_dt(is_train=False)
+    te = create_sales(is_train=False)
     F_cols = [f"F{i}" for i in range(1, 29)]
 
     for tdelta in range(0, 28):
         day = fday + timedelta(days=tdelta)
-        print(tdelta, day)
         mask = (te["date"] >= day - timedelta(days=max_lags)) & (te["date"] <= day)
         tst = te[mask].copy()
-        tst = create_fea(tst)
+        tst = apply_funcs(tst, funcs)
         tst = tst.loc[tst["date"] == day, train_cols]
         te.loc[te["date"] == day, "sales"] = alpha * model.predict(tst)
 

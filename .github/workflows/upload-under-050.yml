@@ -30,12 +30,12 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          slug: m5-under-0-50
-          title: m5-under-0.50
+          slug: "m5-under-0-50-refactored"
+          title: "M5: under 0.50 (refactored)"
           code_file: ./src/under_050.ipynb
           language: python
           kernel_type: notebook
-          is_private: true
+          is_private: false
           enable_gpu: false
           enable_internet: true
           competition_sources: |
